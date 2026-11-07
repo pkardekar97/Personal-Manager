@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Kardekar Manager</title>
+<link rel="manifest" href="app.webmanifest"><meta name="theme-color" content="#0b0f17"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>:root{color-scheme:light dark;--bg:#f2f6fb;--card:#fff;--ink:#0b1b33;--mute:#5d6f89;--line:#d5e0ee;--acc:#0891b2}
+@media(prefers-color-scheme:dark){:root{--bg:#0b0f17;--card:#131a27;--ink:#e8f1ff;--mute:#8fa3c0;--line:#243049;--acc:#22d3ee}}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(900px 500px at 50% -10%,rgba(34,211,238,.12),transparent),var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:max(24px,env(safe-area-inset-top)) 18px 28px;display:flex;justify-content:center}
+main{width:100%;max-width:440px;display:grid;gap:16px;align-content:start;padding-top:6vh}
+header{display:flex;align-items:center;gap:14px;margin-bottom:6px}header img{width:60px;height:60px;border-radius:16px}
+h1{margin:0;font-size:24px;line-height:1.15}header p{margin:2px 0 0;color:var(--mute);font-size:13px}
+a.card{display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;transition:transform .12s,border-color .12s}
+a.card:active{transform:scale(.98);border-color:var(--acc)}a.card img{width:64px;height:64px;border-radius:16px;flex:none}
+b{display:block;font-size:18px}small{color:var(--mute);font-size:13px}.go{margin-left:auto;color:var(--mute);font-size:22px}
+#inst{display:none;border:1px solid var(--acc);color:var(--acc);background:transparent;border-radius:14px;padding:12px;font:600 15px inherit;cursor:pointer}
+footer{text-align:center;color:var(--mute);font-size:12px;margin-top:6px}</style></head><body><main>
+<header><img src="icons/icon-192.png" alt=""><div><h1>Kardekar Manager</h1><p id="d"></p></div></header>
+<a class="card" href="budget/"><img src="budget/icons/icon-192.png" alt=""><span><b>Budget</b><small>Planner, daily log and analytics</small></span><span class="go">›</span></a>
+<a class="card" href="health/"><img src="health/icons/icon-192.png" alt=""><span><b>Health Tracker</b><small>Water, walk, sleep, medicines, mood</small></span><span class="go">›</span></a>
+<button id="inst">Install Kardekar Manager</button>
+<footer>Works offline once installed. Your data stays on this device.</footer></main>
+<script>
+document.getElementById("d").textContent=new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"});
+let dp=null;const b=document.getElementById("inst");
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;b.style.display="block"});
+b.onclick=async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;b.style.display="none"};
+addEventListener("appinstalled",()=>{b.style.display="none"});
+if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
+</script></body></html>

@@ -1,0 +1,2221 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Budget Calculator & Analytics Widget</title>
+  
+  
+  <meta name="theme-color" content="#0b0c0e">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="vendor/tailwind.css">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+  
+  <!-- Chart.js CDN for Long-Term Visualizations -->
+  <script src="vendor/chart.umd.js"></script>
+
+  <style>
+    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-400-normal.woff2') format('woff2');}
+    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:500;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-500-normal.woff2') format('woff2');}
+    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:600;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-600-normal.woff2') format('woff2');}
+    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:700;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-700-normal.woff2') format('woff2');}
+    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:800;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-800-normal.woff2') format('woff2');}
+    
+    * {
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+    }
+
+    /* Range slider custom thumb and track */
+    .spend-range-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      outline: none;
+      cursor: pointer;
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      padding: 0;
+      z-index: 20;
+      /* Track itself ignores touches so swipes that start off the thumb scroll the page */
+      pointer-events: none;
+      touch-action: pan-y pinch-zoom;
+    }
+
+    /* Webkit Circle Thumb */
+    .spend-range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2.5px solid #0284c7;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(56, 189, 248, 0.25);
+      cursor: grab;
+      pointer-events: auto; /* only the thumb is draggable */
+      touch-action: pan-y pinch-zoom;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .spend-range-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+      box-shadow: 0 0 10px rgba(14, 165, 233, 0.6), 0 0 0 3px rgba(14, 165, 233, 0.35);
+    }
+
+    .spend-range-slider::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.35);
+      box-shadow: 0 0 14px rgba(14, 165, 233, 0.9);
+    }
+
+    /* Firefox Circle Thumb */
+    .spend-range-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2.5px solid #0284c7;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(56, 189, 248, 0.25);
+      cursor: grab;
+      pointer-events: auto; /* only the thumb is draggable */
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .spend-range-slider::-moz-range-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    .spend-range-slider::-moz-range-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.35);
+    }
+
+    /* Larger thumb hit area on touch screens, since the track no longer accepts taps */
+    @media (pointer: coarse) {
+      .spend-range-slider::-webkit-slider-thumb { width: 26px; height: 26px; }
+      .spend-range-slider::-moz-range-thumb { width: 26px; height: 26px; }
+    }
+
+    /* Remove number spin arrows */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    /* Styled Select Dropdown Options */
+    .dark select option {
+      background-color: #161922;
+      color: #e2e8f0;
+    }
+    html:not(.dark) select option {
+      background-color: #ffffff;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-[#0b0c0e] text-slate-800 dark:text-slate-200 min-h-screen pt-2 sm:pt-4 pb-12 px-2 sm:px-6 flex flex-col items-center">
+
+  <!-- Main Container -->
+  <main class="w-full max-w-4xl bg-white dark:bg-[#111317] rounded-2xl border border-slate-200 dark:border-[#1e2229] shadow-xl dark:shadow-2xl p-4 sm:p-7 space-y-5">
+
+    <!-- Top Navigation Bar: Navigation Tabs & Theme Toggle -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-[#232730]">
+      <!-- Tab Controls -->
+      <div class="flex flex-wrap items-center gap-1 p-1 bg-slate-200 dark:bg-[#161920] rounded-xl border border-slate-300 dark:border-[#242936]">
+        <button id="tabPlannerBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-white dark:bg-[#202533] text-sky-600 dark:text-sky-300">
+          <i class="fa-solid fa-calculator text-xs"></i>
+          <span>Monthly Planner</span>
+        </button>
+        <button id="tabAnalyticsBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+          <i class="fa-solid fa-chart-line text-xs"></i>
+          <span>Annual Analytics & Trends</span>
+        </button>
+        <button id="tabDailyBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+          <i class="fa-solid fa-calendar-day text-xs"></i>
+          <span>Daily Log</span>
+        </button>
+      </div>
+
+      <!-- Right Controls: Theme Toggle & Cloud Status -->
+      <div class="flex items-center space-x-2">
+        <span id="sync_status" class="text-slate-400 flex items-center gap-1.5 text-[11px] font-medium mr-1">
+          <i class="fa-solid fa-cloud text-slate-400"></i>
+          <span class="hidden sm:inline">Synced</span>
+        </span>
+        <button id="themeToggleBtn" title="Switch Light/Dark Mode" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-[#2c3345] bg-slate-50 dark:bg-[#181c25] hover:bg-slate-200 dark:hover:bg-[#222736] text-slate-700 dark:text-slate-200 text-xs font-semibold shadow-sm active:scale-95 transition">
+          <i id="themeIcon" class="fa-solid fa-moon text-amber-400"></i>
+          <span id="themeLabel">Dark</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- VIEW 1: MONTHLY PLANNER & BUDGET CALCULATOR -->
+    <!-- ============================================================ -->
+    <div id="plannerView" class="space-y-6">
+
+      <!-- Top 3-Metric Summary Header -->
+      <header class="w-full bg-slate-50 dark:bg-transparent rounded-xl p-4 sm:p-0 grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-[#232730] border-b border-slate-200 dark:border-[#232730] pb-6 gap-3 sm:gap-0">
+        
+        <!-- 1. Total Planned / Spent -->
+        <div class="text-center sm:px-4 flex flex-col items-center justify-center">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Spent / Planned</span>
+          <div id="top_total_spent" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">₹0</div>
+          <span id="top_total_cap_sub" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Total Cap: ₹0</span>
+        </div>
+
+        <!-- 2. Available Monthly Surplus -->
+        <div class="text-center sm:px-4 pt-3 sm:pt-0 flex flex-col items-center justify-center">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Available monthly surplus</span>
+          <div id="top_surplus" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-[#4ade80] tracking-tight mt-1">₹45,846</div>
+          <span id="top_salary_sub" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">from ₹45,846 salary</span>
+        </div>
+
+        <!-- 3. Savings & Investment Potential -->
+        <div class="text-center sm:px-4 pt-3 sm:pt-0 flex flex-col items-center justify-center">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Savings & investment potential</span>
+          <div id="top_savings_rate" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-[#4ade80] tracking-tight mt-1">100%</div>
+          <span id="top_status_sub" class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">On track with limits</span>
+        </div>
+      </header>
+
+      <!-- Profile & Period Header Row -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-[#161920] border border-slate-200 dark:border-[#232834] rounded-xl px-4 py-2.5">
+        <div class="flex items-center space-x-2.5 min-w-[220px] flex-1">
+          <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-500 dark:text-sky-400">
+            <i class="fa-regular fa-user text-sm"></i>
+          </div>
+          <div class="flex-1">
+            <label for="userNameInput" class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">Budget Planner</label>
+            <input 
+              id="userNameInput" 
+              type="text" 
+              value="Pranay Kardekar" 
+              class="bg-transparent font-bold text-slate-900 dark:text-white text-sm outline-none w-full focus:text-sky-500 dark:focus:text-sky-300 transition"
+              placeholder="Enter Your Name"
+            />
+          </div>
+        </div>
+
+        <!-- Interactive Month & Year Selectors (2026 to 2035) -->
+        <div class="flex items-center space-x-1.5 bg-white dark:bg-[#12141a] border border-slate-300 dark:border-[#272e3d] rounded-lg px-2.5 py-1.5 shadow-sm">
+          <i class="fa-regular fa-calendar text-xs text-sky-500 dark:text-sky-400 mr-0.5"></i>
+          <select id="monthSelect" class="bg-transparent text-xs font-bold text-sky-600 dark:text-sky-300 outline-none cursor-pointer pr-1">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11" selected>November</option>
+            <option value="12">December</option>
+          </select>
+          <select id="yearSelect" class="bg-transparent text-xs font-bold text-sky-600 dark:text-sky-300 outline-none cursor-pointer">
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+            <option value="2030">2030</option>
+            <option value="2031">2031</option>
+            <option value="2032">2032</option>
+            <option value="2033">2033</option>
+            <option value="2034">2034</option>
+            <option value="2035">2035</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Monthly Net Salary Section -->
+      <section class="space-y-3">
+        <div class="flex items-center justify-between">
+          <label for="salaryInput" class="text-sm font-semibold tracking-wide text-slate-700 dark:text-slate-200">Monthly Net Salary</label>
+          <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Take-Home Income</span>
+        </div>
+        
+        <!-- Salary Input Box -->
+        <div class="relative flex items-center bg-slate-50 dark:bg-[#16191f] border border-slate-300 dark:border-[#262c38] rounded-xl px-4 py-3.5 focus-within:border-sky-500 transition shadow-inner">
+          <span class="text-xl font-bold text-slate-400 mr-2 select-none">₹</span>
+          <input 
+            id="salaryInput" 
+            type="text" 
+            inputmode="numeric" 
+            value="45,846" 
+            class="w-full bg-transparent text-xl font-extrabold text-slate-900 dark:text-white outline-none tracking-wide"
+            placeholder="Enter salary"
+          >
+        </div>
+
+        <!-- Live Calculation Equation Banner -->
+        <div id="surplus_banner" class="bg-emerald-50 dark:bg-[#141e1b] border border-emerald-300 dark:border-emerald-900/60 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between text-xs sm:text-sm font-medium transition-all gap-2">
+          <div class="flex items-center space-x-2 text-slate-700 dark:text-slate-300">
+            <i id="banner_icon" class="fa-solid fa-circle-check text-emerald-500 dark:text-emerald-400"></i>
+            <span>Net Surplus: <strong id="math_salary" class="text-slate-900 dark:text-white">₹45,846</strong> (Salary) − <strong id="math_spent" class="text-slate-900 dark:text-white">₹0</strong> (Spent)</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-slate-400 font-normal">=</span>
+            <span id="math_result" class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60 shadow-sm">+₹45,846 remaining</span>
+          </div>
+        </div>
+
+        <!-- Real surplus reconciliation -->
+        <div class="bg-slate-50 dark:bg-[#16191f] border border-slate-200 dark:border-[#262c38] rounded-xl px-4 py-3 space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <label for="realSurplusInput" class="text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-building-columns text-violet-500"></i> Real Surplus in Bank Account
+            </label>
+            <div class="flex items-center bg-white dark:bg-[#12141a] border border-slate-300 dark:border-[#272e3d] rounded-lg px-2.5 py-1.5 focus-within:border-violet-500 transition">
+              <span class="text-sm font-bold text-slate-400 mr-1">₹</span>
+              <input id="realSurplusInput" type="text" inputmode="decimal" placeholder="Enter at month-end" class="w-36 bg-transparent text-right text-sm font-extrabold text-violet-600 dark:text-violet-300 outline-none">
+            </div>
+          </div>
+          <div id="real_diff" class="hidden"></div>
+        </div>
+      </section>
+
+      <!-- Day that planner spends are logged against -->
+      <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 dark:bg-[#16191f] border border-slate-200 dark:border-[#262c38] rounded-xl px-4 py-2.5">
+        <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5"><i class="fa-solid fa-calendar-check text-sky-500"></i> Spends you enter below are logged on</span>
+        <input id="entryDate" type="date" class="bg-white dark:bg-[#12141a] border border-slate-300 dark:border-[#272e3d] rounded-lg px-2.5 py-1 text-xs font-bold text-sky-600 dark:text-sky-300 outline-none focus:border-sky-500 dark:[color-scheme:dark]">
+      </div>
+
+      <!-- Expense Breakdown Header & Actions -->
+      <div class="flex items-center justify-between pt-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-wide">Expense Breakdown</h2>
+        <div class="flex items-center space-x-1.5 sm:space-x-2 text-xs">
+          <button id="backupBtn" title="Save budget snapshot" class="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-[#1e232d] hover:bg-slate-300 dark:hover:bg-[#282f3d] border border-slate-300 dark:border-[#2d3545] active:scale-95 text-[11px] font-semibold">
+            <i class="fa-solid fa-floppy-disk text-emerald-500 dark:text-emerald-400"></i>
+            <span>Save</span>
+          </button>
+          <button id="restoreBtn" title="Restore this month's saved budget" class="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-[#1e232d] hover:bg-slate-300 dark:hover:bg-[#282f3d] border border-slate-300 dark:border-[#2d3545] active:scale-95 text-[11px] font-semibold">
+            <i class="fa-solid fa-clock-rotate-left text-sky-500 dark:text-sky-400"></i>
+            <span>Restore</span>
+          </button>
+          
+          <!-- Export Dropdown -->
+          <div class="relative inline-block text-left" id="exportDropdownWrapper">
+            <button id="exportMenuBtn" title="Export budget report" class="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-[#1e232d] hover:bg-slate-300 dark:hover:bg-[#282f3d] border border-slate-300 dark:border-[#2d3545] active:scale-95 text-[11px] font-semibold">
+              <i class="fa-solid fa-file-export text-violet-500 dark:text-violet-400"></i>
+              <span>Export</span>
+              <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+            </button>
+            <div id="exportMenu" class="hidden absolute right-0 mt-1.5 w-36 bg-white dark:bg-[#161922] border border-slate-300 dark:border-[#2c3345] rounded-xl shadow-2xl py-1 z-50 text-xs">
+              <button id="exportExcelBtn" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-[#222736] flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition">
+                <i class="fa-solid fa-file-excel text-emerald-500 text-sm"></i>
+                <span>Excel (.csv)</span>
+              </button>
+              <button id="exportPdfBtn" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-[#222736] flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-rose-600 dark:hover:text-rose-400 transition">
+                <i class="fa-solid fa-file-pdf text-rose-500 text-sm"></i>
+                <span>PDF Report</span>
+              </button>
+            </div>
+          </div>
+
+          <button id="resetBtn" class="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-200 dark:bg-[#1a1e27] border border-slate-300 dark:border-[#282d38] active:scale-95 text-[11px]">
+            <i class="fa-solid fa-rotate-left text-[10px]"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Two-tone Category Ratio Bar -->
+      <div class="space-y-1.5">
+        <div class="w-full h-2.5 bg-slate-200 dark:bg-[#1a1e26] rounded-full overflow-hidden flex shadow-inner">
+          <div id="bar_needs" class="h-full bg-sky-400 transition-all duration-300" style="width: 70%;"></div>
+          <div id="bar_wants" class="h-full bg-emerald-400 transition-all duration-300" style="width: 30%;"></div>
+        </div>
+        <div class="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 px-0.5">
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-400 inline-block"></span> Essential Needs</span>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Wants & Lifestyle</span>
+        </div>
+      </div>
+
+      <!-- SECTION 1: Essential Needs Accordion -->
+      <section class="space-y-3.5 pt-1">
+        <button id="toggleNeeds" class="w-full flex items-center justify-between text-left group focus:outline-none">
+          <div class="flex items-center space-x-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+            <span class="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-sky-500 dark:group-hover:text-sky-300 transition">Essential Needs</span>
+          </div>
+          <div class="flex items-center space-x-2.5 text-xs sm:text-sm">
+            <span id="needs_pct" class="text-slate-500 dark:text-slate-400 font-medium">0%</span>
+            <span id="needs_total" class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">₹0</span>
+            <i id="needs_chevron" class="fa-solid fa-chevron-up text-slate-400 text-xs transition-transform duration-200"></i>
+          </div>
+        </button>
+
+        <!-- Essential Needs Grid -->
+        <div id="needs_container" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1 transition-all"></div>
+      </section>
+
+      <!-- SECTION 2: Wants & Lifestyle Accordion -->
+      <section class="space-y-3.5 pt-2">
+        <button id="toggleWants" class="w-full flex items-center justify-between text-left group focus:outline-none">
+          <div class="flex items-center space-x-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <span class="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-emerald-500 dark:group-hover:text-emerald-300 transition">Wants & Lifestyle</span>
+          </div>
+          <div class="flex items-center space-x-2.5 text-xs sm:text-sm">
+            <span id="wants_pct" class="text-slate-500 dark:text-slate-400 font-medium">0%</span>
+            <span id="wants_total" class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">₹0</span>
+            <i id="wants_chevron" class="fa-solid fa-chevron-up text-slate-400 text-xs transition-transform duration-200"></i>
+          </div>
+        </button>
+
+        <!-- Wants Grid -->
+        <div id="wants_container" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1 transition-all"></div>
+      </section>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- VIEW 2: ANNUAL ANALYTICS & LONG-TERM TRENDS -->
+    <!-- ============================================================ -->
+    <div id="analyticsView" class="hidden space-y-6">
+      
+      <!-- Analytics Filter Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-[#161920] border border-slate-200 dark:border-[#232834] rounded-xl px-4 py-3">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-sky-500"></i>
+            Annual Performance Overview
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Aggregated multi-month cash flow and savings trajectory</p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Select Year:</span>
+          <select id="analyticsYearSelect" class="bg-white dark:bg-[#12141a] border border-slate-300 dark:border-[#272e3d] text-sky-600 dark:text-sky-300 font-bold rounded-lg px-3 py-1.5 text-xs outline-none cursor-pointer">
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+            <option value="2030">2030</option>
+            <option value="2031">2031</option>
+            <option value="2032">2032</option>
+            <option value="2033">2033</option>
+            <option value="2034">2034</option>
+            <option value="2035">2035</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 4 Top Annual KPI Metric Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <!-- 1. Annual Income -->
+        <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-3.5 text-center">
+          <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Annual Income</span>
+          <div id="kpi_annual_income" class="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-1">₹0</div>
+          <span class="text-[10px] text-slate-400">12 Months Projected</span>
+        </div>
+
+        <!-- 2. Annual Spent -->
+        <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-3.5 text-center">
+          <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Actual Spent</span>
+          <div id="kpi_annual_spent" class="text-lg sm:text-2xl font-extrabold text-rose-500 dark:text-rose-400 mt-1">₹0</div>
+          <span id="kpi_sub_spent" class="text-[10px] text-slate-400">0% of income</span>
+        </div>
+
+        <!-- 3. Annual Surplus -->
+        <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-3.5 text-center">
+          <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Net Surplus Generated</span>
+          <div id="kpi_annual_surplus" class="text-lg sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">₹0</div>
+          <span class="text-[10px] text-emerald-500">Liquid Savings Potential</span>
+        </div>
+
+        <!-- 4. Avg Savings Rate -->
+        <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-3.5 text-center">
+          <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Avg Savings Rate</span>
+          <div id="kpi_annual_rate" class="text-lg sm:text-2xl font-extrabold text-sky-600 dark:text-sky-400 mt-1">0%</div>
+          <span class="text-[10px] text-slate-400">Target: &ge; 20%</span>
+        </div>
+      </div>
+
+      <!-- Chart 1: 12-Month Net Income vs. Spending vs. Surplus Line/Bar -->
+      <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-4 sm:p-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-arrow-trend-up text-emerald-500"></i>
+            12-Month Cash Flow & Surplus Trajectory
+          </h4>
+          <span class="text-[11px] text-slate-500 dark:text-slate-400">Monthly breakdown (₹)</span>
+        </div>
+        <div class="w-full h-64 sm:h-72">
+          <canvas id="cashflowTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Dual Charts: 50/30/20 Rule + Category Distribution -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Chart 2: 50/30/20 Rule Compliance Stacked Bar -->
+        <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-scale-balanced text-sky-500"></i>
+              50/30/20 Rule Allocation
+            </h4>
+            <span class="text-[10px] text-slate-400">% distribution</span>
+          </div>
+          <div class="w-full h-56">
+            <canvas id="budgetRuleChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: Cumulative Category Spending Donut -->
+        <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-pie text-violet-500"></i>
+              Annual Spending Breakdown
+            </h4>
+            <span class="text-[10px] text-slate-400">By category</span>
+          </div>
+          <div class="w-full h-56 flex items-center justify-center">
+            <canvas id="categoryShareChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- VIEW 3: DAILY SPEND LOG -->
+    <!-- ============================================================ -->
+    <div id="dailyView" class="hidden space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-[#161920] border border-slate-200 dark:border-[#232834] rounded-xl px-4 py-3">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2"><i class="fa-solid fa-calendar-day text-sky-500"></i> Daily Spend Log</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Built automatically from the spends you enter in the Monthly Planner</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button id="dailyPrev" title="Previous month" class="w-8 h-8 rounded-lg border border-slate-300 dark:border-[#2c3345] bg-white dark:bg-[#181c25] text-slate-600 dark:text-slate-300 active:scale-95"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <span id="dailyPeriodLabel" class="text-xs font-bold text-sky-600 dark:text-sky-300 min-w-[110px] text-center"></span>
+          <button id="dailyNext" title="Next month" class="w-8 h-8 rounded-lg border border-slate-300 dark:border-[#2c3345] bg-white dark:bg-[#181c25] text-slate-600 dark:text-slate-300 active:scale-95"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-3 text-center"><span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Logged</span><div id="daily_total" class="text-lg font-extrabold text-slate-900 dark:text-white mt-1">₹0</div></div>
+        <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-3 text-center"><span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Days With Spend</span><div id="daily_days" class="text-lg font-extrabold text-slate-900 dark:text-white mt-1">0</div></div>
+        <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-3 text-center"><span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Avg / Active Day</span><div id="daily_avg" class="text-lg font-extrabold text-sky-600 dark:text-sky-400 mt-1">₹0</div></div>
+        <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-3 text-center"><span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Peak Day</span><div id="daily_peak" class="text-lg font-extrabold text-rose-500 dark:text-rose-400 mt-1">—</div><span id="daily_peak_sub" class="text-[10px] text-slate-400"></span></div>
+      </div>
+
+      <div class="bg-slate-50 dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h4 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2"><i class="fa-solid fa-chart-column text-sky-500"></i> Day-wise Spend</h4>
+          <select id="dailyFilter" class="bg-white dark:bg-[#12141a] border border-slate-300 dark:border-[#272e3d] text-sky-600 dark:text-sky-300 font-bold rounded-lg px-2.5 py-1 text-xs outline-none cursor-pointer max-w-[200px]"></select>
+        </div>
+        <div class="w-full h-48"><canvas id="dailyChart"></canvas></div>
+        <p id="daily_note_line" class="text-[11px] text-slate-500 dark:text-slate-400"></p>
+      </div>
+
+      <div id="dailyList" class="space-y-2.5"></div>
+    </div>
+
+    <!-- Persistent Footer -->
+    <footer class="pt-4 border-t border-slate-200 dark:border-[#1d222b] text-center text-xs text-slate-500 dark:text-slate-500 flex flex-wrap justify-between items-center gap-2">
+      <span>Personal Budget Calculator & Long-Term Financial Analytics</span>
+      <span>Auto-saved locally &bull; Client-side security</span>
+    </footer>
+
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <!-- ============================================================ -->
+  <script>
+    // Complete Baseline Categories: initial spent defaults to 0 across all items
+    const CATEGORIES = {
+      emi:       { name: "EMI / Loan Payments",       group: "needs", defaultLimit: 10000, defaultSpent: 0 },
+      domestic:  { name: "Domestic Help",            group: "needs", defaultLimit: 2500,  defaultSpent: 0 },
+      groceries: { name: "Groceries & Provisions",   group: "needs", defaultLimit: 5000,  defaultSpent: 0 },
+      commute:   { name: "Petrol & Servicing",       group: "needs", defaultLimit: 3000,  defaultSpent: 0 },
+      utilities: { name: "Utilities & Bills",         group: "needs", defaultLimit: 5000,  defaultSpent: 0 },
+      medical:   { name: "Medicines / Doctor",       group: "needs", defaultLimit: 3000,  defaultSpent: 0 },
+      insurance: { name: "Insurance",                 group: "needs", defaultLimit: 2500,  defaultSpent: 0 },
+      investing: { name: "Investing",                 group: "needs", defaultLimit: 5000,  defaultSpent: 0 },
+      emergency: { name: "Emergency Fund",           group: "needs", defaultLimit: 2500,  defaultSpent: 0 },
+      dining:    { name: "Dining Out & Takeout",     group: "wants", defaultLimit: 3500,  defaultSpent: 0 },
+      movies:    { name: "Movies & Outings",         group: "wants", defaultLimit: 1500,  defaultSpent: 0 },
+      subs:      { name: "Subscriptions & Streaming",group: "wants", defaultLimit: 500,   defaultSpent: 0 },
+      shopping:  { name: "Shopping & Personal Care",  group: "wants", defaultLimit: 3000,  defaultSpent: 0 },
+      travel:    { name: "Travel (Train / Flight)",  group: "wants", defaultLimit: 3000,  defaultSpent: 0 },
+      gifts:     { name: "Gifts, Festivals & Events",group: "wants", defaultLimit: 2000,  defaultSpent: 0 },
+      fitness:   { name: "Gym, Sports & Hobbies",    group: "wants", defaultLimit: 1500,  defaultSpent: 0 },
+      misc:      { name: "Miscellaneous / Unplanned",group: "wants", defaultLimit: 1500,  defaultSpent: 0 }
+    };
+
+    // Calculate dynamic slider max ceiling anchored tightly to limit (~1.25x with buffer)
+    function computeSliderCeiling(limit, spent) {
+      const baseLimit = Math.max(limit || 0, 500);
+      const targetMax = Math.ceil(baseLimit * 1.25);
+      return Math.max(targetMax, Math.ceil((spent || 0) * 1.15));
+    }
+
+    // Application State
+    let currentPeriod = "2026-11";
+    let appState = {
+      userName: "Pranay Kardekar",
+      salary: 45846,
+      items: {}
+    };
+
+    // Storage Keys
+    const DB_NAME = 'MultiMonthBudgetDB_v2';
+    const STORE_NAME = 'monthly_records';
+    let dbInstance = null;
+
+    // Chart.js Instances
+    let chartCashflow = null;
+    let chartBudgetRule = null;
+    let chartCategoryShare = null;
+
+    // Helper: Rupee Number Formatter
+    function fmt(num) {
+      return (Number(num) || 0).toLocaleString('en-IN');
+    }
+
+    function parseNum(str) {
+      if (typeof str === 'number') return str;
+      return Number(String(str || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    }
+
+    // Color logic: <80% Sky-blue, 80-100% Amber, >100% Red
+    function getStatusTheme(spent, limit) {
+      const ratio = limit > 0 ? (spent / limit) : 0;
+      if (ratio > 1.0) {
+        return {
+          fillColor: '#ef4444',
+          badgeBg: 'bg-rose-100 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800/60 text-rose-700 dark:text-rose-300',
+          textColor: 'text-rose-600 dark:text-rose-400',
+          statusText: `⚠ Exceeded by ₹${fmt(spent - limit)}`,
+          ratioText: `${Math.round(ratio * 100)}% of limit`
+        };
+      } else if (ratio >= 0.8) {
+        return {
+          fillColor: '#f59e0b',
+          badgeBg: 'bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/60 text-amber-700 dark:text-amber-300',
+          textColor: 'text-amber-600 dark:text-amber-400',
+          statusText: `₹${fmt(limit - spent)} left`,
+          ratioText: `${Math.round(ratio * 100)}% of limit`
+        };
+      } else {
+        return {
+          fillColor: '#0ea5e9',
+          badgeBg: 'bg-emerald-100 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300',
+          textColor: 'text-sky-600 dark:text-sky-400',
+          statusText: `₹${fmt(limit - spent)} left`,
+          ratioText: `${Math.round(ratio * 100)}% of limit`
+        };
+      }
+    }
+
+    // ============================================================
+    // THEME MANAGEMENT (Light / Dark Mode)
+    // ============================================================
+    function initTheme() {
+      const savedTheme = localStorage.getItem('budget_theme') || 'dark';
+      applyTheme(savedTheme);
+
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+          const isDark = document.documentElement.classList.contains('dark');
+          const newTheme = isDark ? 'light' : 'dark';
+          applyTheme(newTheme);
+          localStorage.setItem('budget_theme', newTheme);
+          updateChartsTheme();
+        });
+      }
+    }
+
+    function applyTheme(theme) {
+      const htmlEl = document.documentElement;
+      const themeIcon = document.getElementById('themeIcon');
+      const themeLabel = document.getElementById('themeLabel');
+
+      if (theme === 'dark') {
+        htmlEl.classList.add('dark');
+        if (themeIcon) themeIcon.className = "fa-solid fa-moon text-amber-400";
+        if (themeLabel) themeLabel.textContent = "Dark";
+      } else {
+        htmlEl.classList.remove('dark');
+        if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-500";
+        if (themeLabel) themeLabel.textContent = "Light";
+      }
+    }
+
+    // ============================================================
+    // TAB MANAGEMENT (Planner vs. Analytics)
+    // ============================================================
+    const TAB_ON = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-white dark:bg-[#202533] text-sky-600 dark:text-sky-300";
+    const TAB_OFF = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+    const TABS = { planner: ['tabPlannerBtn', 'plannerView'], analytics: ['tabAnalyticsBtn', 'analyticsView'], daily: ['tabDailyBtn', 'dailyView'] };
+
+    function showTab(name) {
+      Object.keys(TABS).forEach(k => {
+        document.getElementById(TABS[k][1]).classList.toggle('hidden', k !== name);
+        document.getElementById(TABS[k][0]).className = (k === name) ? TAB_ON : TAB_OFF;
+      });
+      if (name === 'analytics') refreshAnalytics(document.getElementById('analyticsYearSelect').value);
+      if (name === 'daily') renderDailyView();
+    }
+
+    function initTabs() {
+      Object.keys(TABS).forEach(k => {
+        document.getElementById(TABS[k][0]).addEventListener('click', () => showTab(k));
+      });
+      const analyticsYearSelect = document.getElementById('analyticsYearSelect');
+      if (analyticsYearSelect) {
+        analyticsYearSelect.addEventListener('change', () => refreshAnalytics(analyticsYearSelect.value));
+      }
+    }
+
+    // ============================================================
+    // DOM GENERATION & CARD LISTENERS
+    // ============================================================
+    function renderCategoryCards() {
+      const needsContainer = document.getElementById('needs_container');
+      const wantsContainer = document.getElementById('wants_container');
+      if (!needsContainer || !wantsContainer) return;
+
+      needsContainer.innerHTML = '';
+      wantsContainer.innerHTML = '';
+
+      Object.keys(CATEGORIES).forEach(key => {
+        const item = CATEGORIES[key];
+        const state = appState.items[key] || { limit: item.defaultLimit, spent: 0 };
+        const maxLimit = computeSliderCeiling(state.limit, state.spent);
+
+        const card = document.createElement('div');
+        card.className = "bg-white dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-3.5 space-y-2.5 transition hover:border-slate-300 dark:hover:border-[#2d3443] shadow-sm";
+        card.id = `card_${key}`;
+        card.innerHTML = `
+          <!-- Header: Title & Editable Limit -->
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-800 dark:text-slate-200 text-sm tracking-tight truncate pr-2">${item.name}</span>
+            <div class="flex items-center space-x-1 bg-slate-100 dark:bg-[#1a1f29] border border-slate-300 dark:border-[#2c3342] rounded-lg px-2 py-1">
+              <span class="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Limit: ₹</span>
+              <input 
+                id="limit_input_${key}" 
+                type="number" 
+                value="${state.limit}" 
+                class="w-16 bg-transparent text-right font-extrabold text-rose-500 dark:text-rose-400 outline-none text-xs" 
+                placeholder="Limit"
+              />
+            </div>
+          </div>
+
+          <!-- Slider Container with dynamic Track and Red Limit Tick -->
+          <div class="relative pt-1 pb-1">
+            <div class="relative w-full h-1.5 bg-slate-200 dark:bg-[#1d232f] rounded-full overflow-hidden">
+              <div id="track_fill_${key}" class="h-full rounded-full transition-all duration-75" style="width: 0%; background-color: #0ea5e9;"></div>
+            </div>
+            
+            <!-- Red Vertical Limit Tick Marker -->
+            <div 
+              id="limit_marker_${key}" 
+              class="absolute top-1/2 -translate-y-1/2 w-1 h-3.5 bg-rose-500 rounded-sm pointer-events-none z-10 shadow-[0_0_8px_rgba(244,63,94,0.9)]" 
+              title="Budget Limit Cap"
+              style="left: 0%;"
+            ></div>
+
+            <!-- Native Range Slider -->
+            <input 
+              id="slider_${key}" 
+              type="range" 
+              min="0" 
+              max="${maxLimit}" 
+              step="1"
+              value="${state.spent}" 
+              class="spend-range-slider"
+            />
+          </div>
+
+          <!-- Range Bounds & % of Limit -->
+          <div class="flex justify-between items-center text-[11px]">
+            <span class="text-slate-400">₹0</span>
+            <span id="pct_label_${key}" class="font-semibold text-sky-500 dark:text-sky-400 text-xs">0% of limit</span>
+            <span id="max_label_${key}" class="text-slate-400 font-mono">Max: ₹${fmt(maxLimit)}</span>
+          </div>
+
+          <!-- Spent Row: Direct Editable Input Box + Remaining Badge -->
+          <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-[#1a1f2a]">
+            <div class="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#191d26] border border-slate-300 dark:border-[#272e3d] rounded-lg px-2.5 py-1 focus-within:border-sky-500 transition">
+              <span class="text-slate-500 dark:text-slate-400 text-xs font-semibold">Spent: ₹</span>
+              <input 
+                id="spent_input_${key}" 
+                type="number" 
+                value="${state.spent}" 
+                class="w-20 bg-transparent font-bold text-slate-900 dark:text-white outline-none text-xs"
+                placeholder="0"
+              />
+            </div>
+            <span id="badge_status_${key}" class="px-2 py-0.5 rounded text-[11px] font-bold">₹0 left</span>
+          </div>
+        `;
+
+        if (item.group === 'needs') {
+          needsContainer.appendChild(card);
+        } else {
+          wantsContainer.appendChild(card);
+        }
+
+        attachItemListeners(key);
+      });
+    }
+
+    function attachItemListeners(key) {
+      const slider = document.getElementById(`slider_${key}`);
+      const spentInput = document.getElementById(`spent_input_${key}`);
+      const limitInput = document.getElementById(`limit_input_${key}`);
+
+      if (!slider || !spentInput || !limitInput) return;
+
+      slider.addEventListener('input', () => {
+        const val = Number(slider.value) || 0;
+        spentInput.value = val;
+        recordSpendChange(key, appState.items[key].spent, val);
+        appState.items[key].spent = val;
+        updateItemUI(key);
+        recalcTotals();
+        triggerAutoSave();
+      });
+
+      spentInput.addEventListener('input', () => {
+        const val = Number(spentInput.value) || 0;
+        recordSpendChange(key, appState.items[key].spent, val);
+        appState.items[key].spent = val;
+        
+        const currentLimit = appState.items[key].limit;
+        const newMax = computeSliderCeiling(currentLimit, val);
+        slider.max = newMax;
+        const maxLabel = document.getElementById(`max_label_${key}`);
+        if (maxLabel) maxLabel.textContent = `Max: ₹${fmt(newMax)}`;
+
+        slider.value = val;
+        updateItemUI(key);
+        recalcTotals();
+        triggerAutoSave();
+      });
+
+      limitInput.addEventListener('input', () => {
+        const newLimit = Math.max(0, Number(limitInput.value) || 0);
+        appState.items[key].limit = newLimit;
+
+        const newMax = computeSliderCeiling(newLimit, appState.items[key].spent);
+        slider.max = newMax;
+        const maxLabel = document.getElementById(`max_label_${key}`);
+        if (maxLabel) maxLabel.textContent = `Max: ₹${fmt(newMax)}`;
+
+        updateItemUI(key);
+        recalcTotals();
+        triggerAutoSave();
+      });
+    }
+
+    function updateItemUI(key) {
+      const item = appState.items[key];
+      const slider = document.getElementById(`slider_${key}`);
+      const trackFill = document.getElementById(`track_fill_${key}`);
+      const limitMarker = document.getElementById(`limit_marker_${key}`);
+      const pctLabel = document.getElementById(`pct_label_${key}`);
+      const badgeStatus = document.getElementById(`badge_status_${key}`);
+      const maxLabel = document.getElementById(`max_label_${key}`);
+
+      if (!slider || !trackFill || !limitMarker) return;
+
+      const spent = item.spent || 0;
+      const limit = item.limit || 0;
+
+      const properMax = computeSliderCeiling(limit, spent);
+      if (Number(slider.max) !== properMax) {
+        slider.max = properMax;
+        if (maxLabel) maxLabel.textContent = `Max: ₹${fmt(properMax)}`;
+      }
+
+      const sliderMax = Number(slider.max) || 1;
+      const fillPct = Math.min(100, Math.max(0, (spent / sliderMax) * 100));
+      trackFill.style.width = `${fillPct}%`;
+
+      const limitPct = Math.min(99, Math.max(1, (limit / sliderMax) * 100));
+      limitMarker.style.left = `calc(${limitPct}% - 2px)`;
+
+      const theme = getStatusTheme(spent, limit);
+      trackFill.style.backgroundColor = theme.fillColor;
+      if (pctLabel) {
+        pctLabel.className = `font-semibold text-xs ${theme.textColor}`;
+        pctLabel.textContent = theme.ratioText;
+      }
+
+      if (badgeStatus) {
+        badgeStatus.className = `px-2 py-0.5 rounded text-[11px] font-bold ${theme.badgeBg}`;
+        badgeStatus.textContent = theme.statusText;
+      }
+    }
+
+    function recalcTotals() {
+      const salary = appState.salary || 0;
+      let totalNeedsSpent = 0;
+      let totalWantsSpent = 0;
+      let totalCap = 0;
+
+      Object.keys(CATEGORIES).forEach(key => {
+        const itemConfig = CATEGORIES[key];
+        const state = appState.items[key];
+        if (!state) return;
+
+        totalCap += (Number(state.limit) || 0);
+
+        if (itemConfig.group === 'needs') {
+          totalNeedsSpent += (Number(state.spent) || 0);
+        } else {
+          totalWantsSpent += (Number(state.spent) || 0);
+        }
+      });
+
+      const totalSpent = totalNeedsSpent + totalWantsSpent;
+      const surplus = salary - totalSpent;
+      const savingsPotential = salary > 0 ? Math.round((surplus / salary) * 100) : 0;
+
+      // Top metric header cards
+      const topSpentEl = document.getElementById('top_total_spent');
+      const topCapSubEl = document.getElementById('top_total_cap_sub');
+      const topSurplusEl = document.getElementById('top_surplus');
+      const topSalarySubEl = document.getElementById('top_salary_sub');
+      const topSavingsRateEl = document.getElementById('top_savings_rate');
+      const topStatusSubEl = document.getElementById('top_status_sub');
+
+      if (topSpentEl) topSpentEl.textContent = `₹${fmt(totalSpent)}`;
+      if (topCapSubEl) topCapSubEl.textContent = `Total Cap: ₹${fmt(totalCap)}`;
+      if (topSalarySubEl) topSalarySubEl.textContent = `from ₹${fmt(salary)} salary`;
+
+      if (topSurplusEl) {
+        if (surplus < 0) {
+          topSurplusEl.textContent = `-₹${fmt(Math.abs(surplus))}`;
+          topSurplusEl.className = "text-2xl sm:text-3xl font-extrabold text-rose-500 dark:text-rose-400 tracking-tight mt-1";
+        } else {
+          topSurplusEl.textContent = `₹${fmt(surplus)}`;
+          topSurplusEl.className = "text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-[#4ade80] tracking-tight mt-1";
+        }
+      }
+
+      if (topSavingsRateEl) {
+        if (savingsPotential < 0) {
+          topSavingsRateEl.textContent = `${savingsPotential}%`;
+          topSavingsRateEl.className = "text-2xl sm:text-3xl font-extrabold text-rose-500 dark:text-rose-400 tracking-tight mt-1";
+          if (topStatusSubEl) {
+            topStatusSubEl.textContent = "Deficit: Over budget!";
+            topStatusSubEl.className = "text-xs text-rose-500 dark:text-rose-400 mt-0.5";
+          }
+        } else {
+          topSavingsRateEl.textContent = `${savingsPotential}%`;
+          topSavingsRateEl.className = "text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-[#4ade80] tracking-tight mt-1";
+          if (topStatusSubEl) {
+            topStatusSubEl.textContent = "On track with limits";
+            topStatusSubEl.className = "text-xs text-emerald-600 dark:text-emerald-400 mt-0.5";
+          }
+        }
+      }
+
+      // Live Calculation Banner
+      const mathSalary = document.getElementById('math_salary');
+      const mathSpent = document.getElementById('math_spent');
+      const mathResult = document.getElementById('math_result');
+      const bannerIcon = document.getElementById('banner_icon');
+      const surplusBanner = document.getElementById('surplus_banner');
+
+      if (mathSalary) mathSalary.textContent = `₹${fmt(salary)}`;
+      if (mathSpent) mathSpent.textContent = `₹${fmt(totalSpent)}`;
+
+      if (mathResult && surplusBanner && bannerIcon) {
+        if (surplus < 0) {
+          surplusBanner.className = "bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-900/70 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between text-xs sm:text-sm font-medium transition-all gap-2";
+          bannerIcon.className = "fa-solid fa-triangle-exclamation text-rose-500 dark:text-rose-400";
+          mathResult.className = "px-2.5 py-1 rounded-md text-xs font-bold bg-rose-100 dark:bg-rose-950 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 shadow-sm";
+          mathResult.textContent = `-₹${fmt(Math.abs(surplus))} deficit`;
+        } else {
+          surplusBanner.className = "bg-emerald-50 dark:bg-[#141e1b] border border-emerald-300 dark:border-emerald-900/60 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between text-xs sm:text-sm font-medium transition-all gap-2";
+          bannerIcon.className = "fa-solid fa-circle-check text-emerald-500 dark:text-emerald-400";
+          mathResult.className = "px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60 shadow-sm";
+          mathResult.textContent = `+₹${fmt(surplus)} remaining`;
+        }
+      }
+
+      // Split ratio bar
+      const needsTotalEl = document.getElementById('needs_total');
+      const wantsTotalEl = document.getElementById('wants_total');
+      const needsPctEl = document.getElementById('needs_pct');
+      const wantsPctEl = document.getElementById('wants_pct');
+      const barNeeds = document.getElementById('bar_needs');
+      const barWants = document.getElementById('bar_wants');
+
+      if (needsTotalEl) needsTotalEl.textContent = `₹${fmt(totalNeedsSpent)}`;
+      if (wantsTotalEl) wantsTotalEl.textContent = `₹${fmt(totalWantsSpent)}`;
+
+      let needsRatio = 50;
+      let wantsRatio = 50;
+      if (totalSpent > 0) {
+        needsRatio = Math.round((totalNeedsSpent / totalSpent) * 100);
+        wantsRatio = 100 - needsRatio;
+      }
+
+      if (needsPctEl) needsPctEl.textContent = `${needsRatio}%`;
+      if (wantsPctEl) wantsPctEl.textContent = `${wantsRatio}%`;
+      if (barNeeds) barNeeds.style.width = `${needsRatio}%`;
+      if (barWants) barWants.style.width = `${wantsRatio}%`;
+      updateRealDiff(surplus);
+    }
+
+    // ============================================================
+    // MULTI-PERIOD PERSISTENCE ENGINE
+    // ============================================================
+    function getStorageKey(period) {
+      return `budget_record_${period}`;
+    }
+
+    function setCookie(name, value, days = 365) {
+      try {
+        const d = new Date();
+        d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + d.toUTCString();
+        const encoded = encodeURIComponent(value);
+        document.cookie = `${name}=${encoded};${expires};path=/;SameSite=None;Secure`;
+      } catch (e) {}
+    }
+
+    function getCookie(name) {
+      try {
+        const cname = name + "=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+          let item = ca[i].trim();
+          if (item.indexOf(cname) === 0) {
+            return item.substring(cname.length, item.length);
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function initIndexedDB() {
+      return new Promise((resolve) => {
+        if (!window.indexedDB) {
+          resolve(null);
+          return;
+        }
+        try {
+          const req = indexedDB.open(DB_NAME, 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+              db.createObjectStore(STORE_NAME, { keyPath: 'period' });
+            }
+          };
+          req.onsuccess = (e) => {
+            dbInstance = e.target.result;
+            resolve(dbInstance);
+          };
+          req.onerror = () => resolve(null);
+        } catch (err) {
+          resolve(null);
+        }
+      });
+    }
+
+    async function loadPeriodState(period) {
+      const key = getStorageKey(period);
+      
+      const preservedName = appState.userName || localStorage.getItem('budget_user_name') || "Pranay Kardekar";
+      appState.userName = preservedName;
+      appState.salary = 45846;
+      Object.keys(CATEGORIES).forEach(k => {
+        appState.items[k] = {
+          limit: CATEGORIES[k].defaultLimit,
+          spent: 0
+        };
+      });
+
+      appState.dailySpend = {};
+      appState.realSurplus = null;
+      let loaded = false;
+
+      // 1. Try Cookie
+      const cookieData = getCookie(key);
+      if (cookieData) {
+        try {
+          const parsedCookie = JSON.parse(cookieData);
+          if (parsedCookie && typeof parsedCookie.salary === 'number') {
+            applyLoadedData(parsedCookie);
+            loaded = true;
+          }
+        } catch (e) {}
+      }
+
+      // 2. Try IndexedDB
+      if (!loaded && dbInstance) {
+        try {
+          const tx = dbInstance.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.get(period);
+          const result = await new Promise(res => {
+            req.onsuccess = () => res(req.result);
+            req.onerror = () => res(null);
+          });
+          if (result && result.data && typeof result.data.salary === 'number') {
+            applyLoadedData(result.data);
+            loaded = true;
+          }
+        } catch (e) {}
+      }
+
+      // 3. Try LocalStorage
+      if (!loaded) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            const parsedStorage = JSON.parse(raw);
+            if (parsedStorage && typeof parsedStorage.salary === 'number') {
+              applyLoadedData(parsedStorage);
+              loaded = true;
+            }
+          }
+        } catch (e) {}
+      }
+
+      reconcileDaily();
+      return loaded;
+    }
+
+    function applyLoadedData(data) {
+      const ds = {};
+      if (data.dailySpend && typeof data.dailySpend === 'object') {
+        Object.keys(data.dailySpend).forEach(d => {
+          const row = {};
+          Object.keys(data.dailySpend[d] || {}).forEach(k => {
+            const v = Number(data.dailySpend[d][k]);
+            if (CATEGORIES[k] && v > 0) row[k] = v;
+          });
+          if (Object.keys(row).length) ds[d] = row;
+        });
+      }
+      if (Array.isArray(data.dailyLog)) { // entries saved by the earlier version
+        data.dailyLog.forEach(e => {
+          if (e && e.date && CATEGORIES[e.cat] && Number(e.amt) > 0) {
+            ds[e.date] = ds[e.date] || {};
+            ds[e.date][e.cat] = (ds[e.date][e.cat] || 0) + Number(e.amt);
+          }
+        });
+      }
+      appState.dailySpend = ds;
+      appState.realSurplus = (data.realSurplus === null || data.realSurplus === undefined || data.realSurplus === '' || isNaN(Number(data.realSurplus)))
+        ? null : Number(data.realSurplus);
+      if (data.userName && typeof data.userName === 'string') {
+        appState.userName = data.userName;
+      }
+      if (typeof data.salary === 'number' && data.salary > 0) {
+        appState.salary = data.salary;
+      }
+      if (data.items) {
+        Object.keys(CATEGORIES).forEach(k => {
+          if (data.items[k]) {
+            appState.items[k] = {
+              limit: Number(data.items[k].limit) >= 0 ? Number(data.items[k].limit) : CATEGORIES[k].defaultLimit,
+              spent: Number(data.items[k].spent) >= 0 ? Number(data.items[k].spent) : 0
+            };
+          }
+        });
+      }
+    }
+
+    let saveTimeout = null;
+    function triggerAutoSave() {
+      const syncStatus = document.getElementById('sync_status');
+      if (syncStatus) {
+        syncStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-sky-500"></i><span class="text-sky-500 hidden sm:inline">Saving...</span>`;
+      }
+
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveCurrentPeriod();
+      }, 400);
+    }
+
+    function saveCurrentPeriod() {
+      const key = getStorageKey(currentPeriod);
+      const serialized = JSON.stringify(appState);
+
+      if (encodeURIComponent(serialized).length < 3500) {
+        setCookie(key, serialized, 365);
+      } else {
+        try { document.cookie = `${key}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;SameSite=None;Secure`; } catch (e) {}
+      }
+      setCookie('last_selected_period', currentPeriod, 365);
+
+      if (dbInstance) {
+        try {
+          const tx = dbInstance.transaction(STORE_NAME, 'readwrite');
+          const store = tx.objectStore(STORE_NAME);
+          store.put({ period: currentPeriod, data: appState, updatedAt: Date.now() });
+        } catch (e) {}
+      }
+
+      try {
+        localStorage.setItem(key, serialized);
+        localStorage.setItem('last_selected_period', currentPeriod);
+        if (appState.userName) {
+          localStorage.setItem('budget_user_name', appState.userName);
+        }
+      } catch (e) {}
+
+      const syncStatus = document.getElementById('sync_status');
+      if (syncStatus) {
+        syncStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i><span class="text-emerald-500 hidden sm:inline">Saved</span>`;
+        setTimeout(() => {
+          syncStatus.innerHTML = `<i class="fa-solid fa-cloud text-slate-400"></i><span class="text-slate-400 hidden sm:inline">Synced</span>`;
+        }, 1500);
+      }
+    }
+
+    function refreshUIFromState() {
+      const userNameInput = document.getElementById('userNameInput');
+      const savedName = localStorage.getItem('budget_user_name');
+      if (savedName) {
+        appState.userName = savedName;
+      }
+      if (userNameInput) {
+        userNameInput.value = appState.userName || "Pranay Kardekar";
+      }
+
+      const salaryInput = document.getElementById('salaryInput');
+      if (salaryInput) salaryInput.value = fmt(appState.salary);
+
+      Object.keys(CATEGORIES).forEach(k => {
+        const state = appState.items[k];
+        const slider = document.getElementById(`slider_${k}`);
+        const spentInput = document.getElementById(`spent_input_${k}`);
+        const limitInput = document.getElementById(`limit_input_${k}`);
+        if (slider) slider.value = state.spent || 0;
+        if (spentInput) spentInput.value = state.spent || 0;
+        if (limitInput) limitInput.value = state.limit;
+        updateItemUI(k);
+      });
+      syncRealInput();
+      syncEntryDate();
+      if (!document.getElementById('dailyView').classList.contains('hidden')) renderDailyView();
+      recalcTotals();
+    }
+
+    // ============================================================
+    // ANNUAL ANALYTICS & CHART.JS ENGINE
+    // ============================================================
+    async function getPeriodRecord(period) {
+      const key = getStorageKey(period);
+
+      // 1. Check IndexedDB
+      if (dbInstance) {
+        try {
+          const tx = dbInstance.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.get(period);
+          const res = await new Promise(r => {
+            req.onsuccess = () => r(req.result);
+            req.onerror = () => r(null);
+          });
+          if (res && res.data) return res.data;
+        } catch (e) {}
+      }
+
+      // 2. Check LocalStorage
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+
+      // 3. Check Cookie
+      const cookieData = getCookie(key);
+      if (cookieData) {
+        try {
+          return JSON.parse(cookieData);
+        } catch (e) {}
+      }
+
+      // Default fallback projection if user hasn't visited this month
+      return null;
+    }
+
+    async function refreshAnalytics(year) {
+      const monthShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      let salaries = [];
+      let spendings = [];
+      let surpluses = [];
+      let needsPctArr = [];
+      let wantsPctArr = [];
+      let savingsPctArr = [];
+      let realArr = [];
+
+      let categoryCumulative = {};
+      Object.keys(CATEGORIES).forEach(k => {
+        categoryCumulative[k] = 0;
+      });
+
+      let annualIncome = 0;
+      let annualSpent = 0;
+      let annualSurplus = 0;
+
+      for (let m = 1; m <= 12; m++) {
+        const periodKey = `${year}-${String(m).padStart(2, '0')}`;
+        const record = await getPeriodRecord(periodKey);
+
+        const sal = (record && record.salary) ? record.salary : (appState.salary || 45846);
+        let mSpent = 0;
+        let mNeeds = 0;
+        let mWants = 0;
+
+        if (record && record.items) {
+          Object.keys(CATEGORIES).forEach(k => {
+            const sp = (record.items[k] && record.items[k].spent) ? Number(record.items[k].spent) : 0;
+            mSpent += sp;
+            categoryCumulative[k] += sp;
+            if (CATEGORIES[k].group === 'needs') mNeeds += sp;
+            else mWants += sp;
+          });
+        }
+
+        const mSurplus = sal - mSpent;
+
+        salaries.push(sal);
+        spendings.push(mSpent);
+        surpluses.push(mSurplus);
+        realArr.push(record && record.realSurplus !== null && record.realSurplus !== undefined && record.realSurplus !== '' ? Number(record.realSurplus) : null);
+
+        annualIncome += sal;
+        annualSpent += mSpent;
+        annualSurplus += mSurplus;
+
+        // 50/30/20 breakdown
+        const needsPct = sal > 0 ? Math.round((mNeeds / sal) * 100) : 0;
+        const wantsPct = sal > 0 ? Math.round((mWants / sal) * 100) : 0;
+        const savPct = sal > 0 ? Math.max(0, Math.round((mSurplus / sal) * 100)) : 0;
+
+        needsPctArr.push(needsPct);
+        wantsPctArr.push(wantsPct);
+        savingsPctArr.push(savPct);
+      }
+
+      const avgSavingsRate = annualIncome > 0 ? Math.round((annualSurplus / annualIncome) * 100) : 0;
+      const spentShare = annualIncome > 0 ? Math.round((annualSpent / annualIncome) * 100) : 0;
+
+      // Update Top Annual KPI Cards
+      document.getElementById('kpi_annual_income').textContent = `₹${fmt(annualIncome)}`;
+      document.getElementById('kpi_annual_spent').textContent = `₹${fmt(annualSpent)}`;
+      document.getElementById('kpi_sub_spent').textContent = `${spentShare}% of annual income`;
+      document.getElementById('kpi_annual_surplus').textContent = `₹${fmt(annualSurplus)}`;
+      document.getElementById('kpi_annual_rate').textContent = `${avgSavingsRate}%`;
+
+      // Render Charts
+      renderCashflowChart(monthShort, salaries, spendings, surpluses, realArr);
+      renderBudgetRuleChart(monthShort, needsPctArr, wantsPctArr, savingsPctArr);
+      renderCategoryShareChart(categoryCumulative);
+    }
+
+    function getChartThemeConfig() {
+      const isDark = document.documentElement.classList.contains('dark');
+      return {
+        textColor: isDark ? '#94a3b8' : '#64748b',
+        gridColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)',
+        tooltipBg: isDark ? '#1e232d' : '#ffffff',
+        tooltipText: isDark ? '#ffffff' : '#0f172a'
+      };
+    }
+
+    function renderCashflowChart(labels, salaries, spendings, surpluses, realSurpluses) {
+      const ctx = document.getElementById('cashflowTrendChart').getContext('2d');
+      const cfg = getChartThemeConfig();
+
+      if (chartCashflow) chartCashflow.destroy();
+
+      chartCashflow = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'Real Surplus in Bank (₹)',
+              data: realSurpluses,
+              borderColor: '#8b5cf6',
+              backgroundColor: '#8b5cf6',
+              borderDash: [6, 4],
+              borderWidth: 2.5,
+              pointStyle: 'rectRot',
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              spanGaps: true,
+              tension: 0.35,
+              fill: false,
+              order: 0
+            },
+            {
+              type: 'line',
+              label: 'Net Surplus (₹)',
+              data: surpluses,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2.5,
+              pointBackgroundColor: '#10b981',
+              pointRadius: 4,
+              order: 1
+            },
+            {
+              type: 'bar',
+              label: 'Actual Spent (₹)',
+              data: spendings,
+              backgroundColor: 'rgba(239, 68, 68, 0.75)',
+              borderRadius: 5,
+              barPercentage: 0.55,
+              order: 2
+            },
+            {
+              type: 'bar',
+              label: 'Net Salary (₹)',
+              data: salaries,
+              backgroundColor: 'rgba(14, 165, 233, 0.25)',
+              borderRadius: 5,
+              barPercentage: 0.55,
+              order: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: cfg.textColor, font: { size: 11, family: 'Plus Jakarta Sans' } }
+            },
+            tooltip: {
+              backgroundColor: cfg.tooltipBg,
+              titleColor: cfg.tooltipText,
+              bodyColor: cfg.tooltipText,
+              borderColor: 'rgba(100, 116, 139, 0.2)',
+              borderWidth: 1,
+              callbacks: {
+                label: function(c) {
+                  return ` ${c.dataset.label}: ₹${fmt(c.parsed.y)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: cfg.gridColor },
+              ticks: { color: cfg.textColor, font: { size: 11 } }
+            },
+            y: {
+              grid: { color: cfg.gridColor },
+              ticks: {
+                color: cfg.textColor,
+                font: { size: 10 },
+                callback: function(v) { return '₹' + (v >= 1000 ? (v / 1000) + 'k' : v); }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderBudgetRuleChart(labels, needs, wants, savings) {
+      const ctx = document.getElementById('budgetRuleChart').getContext('2d');
+      const cfg = getChartThemeConfig();
+
+      if (chartBudgetRule) chartBudgetRule.destroy();
+
+      chartBudgetRule = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Needs (Target \u226450%)',
+              data: needs,
+              backgroundColor: '#0ea5e9',
+              borderRadius: 3
+            },
+            {
+              label: 'Wants (Target \u226430%)',
+              data: wants,
+              backgroundColor: '#f59e0b',
+              borderRadius: 3
+            },
+            {
+              label: 'Savings (Target \u226520%)',
+              data: savings,
+              backgroundColor: '#10b981',
+              borderRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: true,
+              grid: { color: cfg.gridColor },
+              ticks: { color: cfg.textColor, font: { size: 10 } }
+            },
+            y: {
+              stacked: true,
+              max: 100,
+              grid: { color: cfg.gridColor },
+              ticks: {
+                color: cfg.textColor,
+                font: { size: 10 },
+                callback: function(v) { return v + '%'; }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: cfg.textColor, font: { size: 10, family: 'Plus Jakarta Sans' }, boxWidth: 12 }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(c) {
+                  return ` ${c.dataset.label}: ${c.parsed.y}%`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCategoryShareChart(catData) {
+      const ctx = document.getElementById('categoryShareChart').getContext('2d');
+      const cfg = getChartThemeConfig();
+
+      if (chartCategoryShare) chartCategoryShare.destroy();
+
+      const labels = [];
+      const values = [];
+      const palette = [
+        '#0284c7', '#38bdf8', '#0ea5e9', '#0369a1', '#06b6d4',
+        '#059669', '#10b981', '#34d399', '#6ee7b7', '#f59e0b',
+        '#d97706', '#8b5cf6', '#ec4899', '#f43f5e', '#14b8a6', '#eab308', '#a855f7', '#64748b'
+      ];
+
+      Object.keys(CATEGORIES).forEach(k => {
+        labels.push(CATEGORIES[k].name);
+        values.push(catData[k] || 0);
+      });
+
+      const totalSpentAll = values.reduce((a, b) => a + b, 0);
+
+      chartCategoryShare = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: totalSpentAll > 0 ? values : Object.keys(CATEGORIES).map(k => CATEGORIES[k].defaultLimit),
+            backgroundColor: palette,
+            borderColor: document.documentElement.classList.contains('dark') ? '#14171d' : '#ffffff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(c) {
+                  const val = c.parsed;
+                  const pct = totalSpentAll > 0 ? Math.round((val / totalSpentAll) * 100) : 0;
+                  return ` ${c.label}: ₹${fmt(val)} (${pct}%)`;
+                }
+              }
+            }
+          },
+          cutout: '65%'
+        }
+      });
+    }
+
+    function updateChartsTheme() {
+      if (chartDaily) renderDailyView();
+      if (chartCashflow || chartBudgetRule || chartCategoryShare) {
+        const selYear = document.getElementById('analyticsYearSelect').value;
+        refreshAnalytics(selYear);
+      }
+    }
+
+    // ============================================================
+    // EXPORT HANDLERS (Excel & PDF)
+    // ============================================================
+    // ============================================================
+    // REAL SURPLUS (bank reconciliation)
+    // ============================================================
+    const $id = id => document.getElementById(id);
+
+    function syncRealInput() {
+      const el = $id('realSurplusInput');
+      if (el) el.value = (appState.realSurplus == null || isNaN(appState.realSurplus)) ? '' : fmt(appState.realSurplus);
+    }
+
+    function setupRealSurplus() {
+      const el = $id('realSurplusInput');
+      if (!el) return;
+      el.addEventListener('focus', () => { el.value = appState.realSurplus == null ? '' : appState.realSurplus; });
+      el.addEventListener('input', () => {
+        const raw = el.value.trim();
+        appState.realSurplus = raw === '' ? null : parseNum(raw);
+        recalcTotals();
+        triggerAutoSave();
+      });
+      el.addEventListener('blur', syncRealInput);
+    }
+
+    function updateRealDiff(surplus) {
+      const el = $id('real_diff');
+      if (!el) return;
+      const real = appState.realSurplus;
+      if (real === null || real === undefined || isNaN(real)) { el.className = 'hidden'; return; }
+      const diff = real - surplus;
+      if (diff === 0) {
+        el.className = 'text-[11px] font-medium text-emerald-600 dark:text-emerald-400';
+        el.innerHTML = '<i class="fa-solid fa-circle-check"></i> Bank balance matches the app surplus.';
+      } else if (diff < 0) {
+        el.className = 'text-[11px] font-medium text-amber-600 dark:text-amber-400';
+        el.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Bank is <strong>₹${fmt(Math.abs(diff))}</strong> lower than the app surplus (₹${fmt(surplus)}) — roughly that much spending isn't tracked yet.`;
+      } else {
+        el.className = 'text-[11px] font-medium text-sky-600 dark:text-sky-400';
+        el.innerHTML = `<i class="fa-solid fa-circle-info"></i> Bank is <strong>₹${fmt(diff)}</strong> higher than the app surplus (₹${fmt(surplus)}) — possible untracked income or overstated spending.`;
+      }
+    }
+
+    // ============================================================
+    // DAILY SPEND LOG
+    // ============================================================
+    let chartDaily = null;
+    let dailyFilter = 'all';
+    let entryDate = null;
+    const MONTHS_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const pad2 = n => String(n).padStart(2, '0');
+    const r2 = n => Math.round(n * 100) / 100;
+
+    function periodParts() {
+      const [y, m] = currentPeriod.split('-').map(Number);
+      return { y, m, days: new Date(y, m, 0).getDate() };
+    }
+
+    // The planner logs new spends against this date (today if the month is current, else the 1st)
+    function syncEntryDate() {
+      const el = $id('entryDate');
+      if (!el) return;
+      const { y, m, days } = periodParts();
+      const prefix = `${y}-${pad2(m)}`;
+      el.min = `${prefix}-01`;
+      el.max = `${prefix}-${pad2(days)}`;
+      if (!entryDate || !entryDate.startsWith(prefix)) {
+        const t = new Date();
+        entryDate = (t.getFullYear() === y && t.getMonth() + 1 === m) ? `${prefix}-${pad2(t.getDate())}` : `${prefix}-01`;
+      }
+      el.value = entryDate;
+    }
+
+    // Called whenever a head's Spent changes: the difference is booked on / taken off days
+    function recordSpendChange(key, oldVal, newVal) {
+      const delta = r2((Number(newVal) || 0) - (Number(oldVal) || 0));
+      if (!delta) return;
+      if (!entryDate) syncEntryDate();
+      const log = appState.dailySpend;
+      if (delta > 0) {
+        log[entryDate] = log[entryDate] || {};
+        log[entryDate][key] = r2((log[entryDate][key] || 0) + delta);
+        return;
+      }
+      let need = -delta;
+      const dates = [entryDate, ...Object.keys(log).filter(d => d !== entryDate).sort().reverse()];
+      for (const d of dates) {
+        const have = (log[d] && log[d][key]) || 0;
+        if (!have) continue;
+        const take = Math.min(have, need);
+        log[d][key] = r2(have - take);
+        if (log[d][key] <= 0) delete log[d][key];
+        if (!Object.keys(log[d]).length) delete log[d];
+        need = r2(need - take);
+        if (need <= 0) break;
+      }
+    }
+
+    // Day-wise amounts can never exceed what the planner says was spent on that head
+    function reconcileDaily() {
+      const log = appState.dailySpend || (appState.dailySpend = {});
+      Object.keys(CATEGORIES).forEach(k => {
+        const spent = Number(appState.items[k] && appState.items[k].spent) || 0;
+        let logged = 0;
+        Object.keys(log).forEach(d => { logged += log[d][k] || 0; });
+        let extra = r2(logged - spent);
+        Object.keys(log).sort().reverse().forEach(d => {
+          if (extra <= 0 || !log[d][k]) return;
+          const t = Math.min(log[d][k], extra);
+          log[d][k] = r2(log[d][k] - t);
+          if (log[d][k] <= 0) delete log[d][k];
+          extra = r2(extra - t);
+        });
+      });
+      Object.keys(log).forEach(d => { if (!Object.keys(log[d]).length) delete log[d]; });
+    }
+
+    function setupDaily() {
+      const opts = g => Object.keys(CATEGORIES).filter(k => CATEGORIES[k].group === g).map(k => `<option value="${k}">${CATEGORIES[k].name}</option>`).join('');
+      $id('dailyFilter').innerHTML = `<option value="all">All heads</option><optgroup label="Essential Needs">${opts('needs')}</optgroup><optgroup label="Wants & Lifestyle">${opts('wants')}</optgroup>`;
+      $id('dailyFilter').addEventListener('change', e => { dailyFilter = e.target.value; renderDailyView(); });
+      $id('entryDate').addEventListener('change', e => { entryDate = e.target.value || null; syncEntryDate(); });
+      const shift = delta => {
+        const { y, m } = periodParts();
+        const dt = new Date(y, m - 1 + delta, 1);
+        const ySel = $id('yearSelect');
+        if (![...ySel.options].some(o => o.value === String(dt.getFullYear()))) return;
+        ySel.value = dt.getFullYear();
+        $id('monthSelect').value = dt.getMonth() + 1;
+        $id('monthSelect').dispatchEvent(new Event('change'));
+      };
+      $id('dailyPrev').addEventListener('click', () => shift(-1));
+      $id('dailyNext').addEventListener('click', () => shift(1));
+    }
+
+    function renderDailyView() {
+      const { y, m, days } = periodParts();
+      const prefix = `${y}-${pad2(m)}`;
+      $id('dailyPeriodLabel').textContent = `${MONTHS_FULL[m - 1]} ${y}`;
+
+      const log = appState.dailySpend || {};
+      const keys = Object.keys(CATEGORIES).filter(k => dailyFilter === 'all' || k === dailyFilter);
+      const dates = Object.keys(log).filter(d => d.startsWith(prefix)).sort().reverse();
+
+      const perDay = Array(days).fill(0);
+      const rowsByDate = {};
+      let loggedAll = 0;
+      dates.forEach(d => {
+        const rows = keys.filter(k => log[d][k] > 0).map(k => ({ k, amt: log[d][k] })).sort((a, b) => b.amt - a.amt);
+        rowsByDate[d] = rows;
+        perDay[parseInt(d.slice(8, 10), 10) - 1] += rows.reduce((s2, r) => s2 + r.amt, 0);
+      });
+      Object.keys(CATEGORIES).forEach(k => dates.forEach(d => { loggedAll += log[d][k] || 0; }));
+
+      const total = perDay.reduce((a, b) => a + b, 0);
+      const active = perDay.filter(v => v > 0).length;
+      const peak = Math.max(...perDay);
+      $id('daily_total').textContent = `₹${fmt(total)}`;
+      $id('daily_days').textContent = `${active} / ${days}`;
+      $id('daily_avg').textContent = `₹${fmt(active ? Math.round(total / active) : 0)}`;
+      $id('daily_peak').textContent = peak > 0 ? `₹${fmt(peak)}` : '—';
+      $id('daily_peak_sub').textContent = peak > 0 ? `on ${MONTHS_FULL[m - 1].slice(0, 3)} ${perDay.indexOf(peak) + 1}` : 'no spends yet';
+
+      // Spend that was never tied to a day (typed in before day tracking, or on another date's reduction)
+      const undated = keys.map(k => {
+        let dated = 0;
+        dates.forEach(d => { dated += log[d][k] || 0; });
+        return { k, amt: r2((Number(appState.items[k] && appState.items[k].spent) || 0) - dated) };
+      }).filter(r => r.amt > 0).sort((a, b) => b.amt - a.amt);
+      const undatedSum = undated.reduce((a, r) => a + r.amt, 0);
+
+      $id('daily_note_line').textContent = `Day-wise ₹${fmt(loggedAll)} of ₹${fmt(Object.keys(CATEGORIES).reduce((a, k) => a + (Number(appState.items[k] && appState.items[k].spent) || 0), 0))} spent in the planner. Change a head's Spent in the planner (on the date shown there) and it appears here automatically.`;
+
+      const cfg = getChartThemeConfig();
+      if (chartDaily) chartDaily.destroy();
+      chartDaily = new Chart($id('dailyChart').getContext('2d'), {
+        type: 'bar',
+        data: { labels: perDay.map((_, i) => i + 1), datasets: [{ label: 'Spent (₹)', data: perDay, backgroundColor: 'rgba(14, 165, 233, 0.8)', borderRadius: 4 }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { title: i => `${MONTHS_FULL[m - 1]} ${i[0].label}`, label: c => ` ₹${fmt(c.parsed.y)}` } }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: cfg.textColor, font: { size: 10 } } },
+            y: { beginAtZero: true, grid: { color: cfg.gridColor }, ticks: { color: cfg.textColor, font: { size: 10 } } }
+          }
+        }
+      });
+
+      const rowHtml = r => `<div class="flex items-center gap-2 px-3.5 py-2 text-xs border-t border-slate-100 dark:border-[#1a1f2a]">
+          <span class="w-2 h-2 rounded-full shrink-0 ${CATEGORIES[r.k].group === 'needs' ? 'bg-sky-500' : 'bg-emerald-500'}"></span>
+          <span class="flex-1 min-w-0 truncate font-semibold text-slate-800 dark:text-slate-200">${CATEGORIES[r.k].name}</span>
+          <span class="font-bold text-slate-900 dark:text-white">₹${fmt(r.amt)}</span></div>`;
+      const cardHtml = (label, sum, rows, muted) => `<div class="bg-white dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl overflow-hidden">
+          <div class="flex items-center justify-between px-3.5 py-2 bg-slate-50 dark:bg-[#171a21] text-xs">
+            <span class="font-bold ${muted ? 'text-slate-500 dark:text-slate-400' : 'text-slate-800 dark:text-slate-200'}">${label}</span>
+            <span class="font-extrabold text-slate-900 dark:text-white">₹${fmt(sum)}</span></div>${rows.map(rowHtml).join('')}</div>`;
+
+      let html = dates.filter(d => rowsByDate[d].length).map(d => {
+        const label = new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short' });
+        return cardHtml(label, rowsByDate[d].reduce((a, r) => a + r.amt, 0), rowsByDate[d], false);
+      }).join('');
+      if (undated.length) html += cardHtml('Not tied to a day', undatedSum, undated, true);
+      $id('dailyList').innerHTML = html || `<div class="text-center text-xs text-slate-400 py-8">No spends recorded${dailyFilter === 'all' ? '' : ' for this head'} in ${MONTHS_FULL[m - 1]} yet.</div>`;
+    }
+
+    function getExportData() {
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const parts = currentPeriod.split('-');
+      const year = parts[0];
+      const monthIndex = parseInt(parts[1], 10) - 1;
+      const periodLabel = `${monthNames[monthIndex]} ${year}`;
+
+      let needsRows = [];
+      let wantsRows = [];
+      let totalNeedsSpent = 0;
+      let totalNeedsLimit = 0;
+      let totalWantsSpent = 0;
+      let totalWantsLimit = 0;
+
+      Object.keys(CATEGORIES).forEach(k => {
+        const item = CATEGORIES[k];
+        const state = appState.items[k] || { limit: item.defaultLimit, spent: 0 };
+        const spent = Number(state.spent) || 0;
+        const limit = Number(state.limit) || 0;
+        const remaining = limit - spent;
+        const pctUsed = limit > 0 ? Math.round((spent / limit) * 100) : 0;
+
+        const row = {
+          category: item.name,
+          limit: limit,
+          spent: spent,
+          remaining: remaining,
+          pctUsed: pctUsed
+        };
+
+        if (item.group === 'needs') {
+          needsRows.push(row);
+          totalNeedsSpent += spent;
+          totalNeedsLimit += limit;
+        } else {
+          wantsRows.push(row);
+          totalWantsSpent += spent;
+          totalWantsLimit += limit;
+        }
+      });
+
+      const totalSpent = totalNeedsSpent + totalWantsSpent;
+      const totalCap = totalNeedsLimit + totalWantsLimit;
+      const surplus = appState.salary - totalSpent;
+      const savingsRate = appState.salary > 0 ? Math.round((surplus / appState.salary) * 100) : 0;
+
+      return {
+        userName: appState.userName || "Pranay Kardekar",
+        periodLabel,
+        salary: appState.salary,
+        totalCap,
+        totalSpent,
+        surplus,
+        savingsRate,
+        needsRows,
+        wantsRows,
+        totalNeedsSpent,
+        totalNeedsLimit,
+        totalWantsSpent,
+        totalWantsLimit
+      };
+    }
+
+    function exportToExcel() {
+      const d = getExportData();
+      let csv = "\uFEFF"; // UTF-8 BOM
+      csv += `Monthly Budget Report - ${d.periodLabel}\n`;
+      csv += `Budget Planner,"${d.userName}"\n`;
+      csv += `Monthly Net Salary,Rs. ${d.salary}\n`;
+      csv += `Total Planned Cap,Rs. ${d.totalCap}\n`;
+      csv += `Total Spent,Rs. ${d.totalSpent}\n`;
+      csv += `Net Available Surplus,Rs. ${d.surplus}\n`;
+      csv += `Savings Potential,${d.savingsRate}%\n`;
+      csv += `Real Surplus in Bank,${appState.realSurplus == null ? 'Not entered' : 'Rs. ' + appState.realSurplus}\n\n`;
+
+      csv += `Section,Category,Budget Limit (Rs.),Actual Spent (Rs.),Remaining (Rs.),Status (% Used)\n`;
+      d.needsRows.forEach(r => {
+        csv += `Essential Needs,"${r.category}",${r.limit},${r.spent},${r.remaining},${r.pctUsed}%\n`;
+      });
+      csv += `Subtotal Needs,Essential Needs Total,${d.totalNeedsLimit},${d.totalNeedsSpent},${d.totalNeedsLimit - d.totalNeedsSpent},-\n\n`;
+
+      d.wantsRows.forEach(r => {
+        csv += `Wants & Lifestyle,"${r.category}",${r.limit},${r.spent},${r.remaining},${r.pctUsed}%\n`;
+      });
+      csv += `Subtotal Wants,Wants Total,${d.totalWantsLimit},${d.totalWantsSpent},${d.totalWantsLimit - d.totalWantsSpent},-\n`;
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      downloadBlob(blob, `Budget_Report_${currentPeriod}.csv`);
+    }
+
+    function exportToPdf() {
+      const d = getExportData();
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert("Please allow popups to generate the printable PDF report.");
+        return;
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Budget Report - ${d.periodLabel}</title>
+          <style>
+            @page { size: A4; margin: 16mm; }
+            body { font-family: system-ui, -apple-system, sans-serif; color: #1e293b; margin: 0; padding: 10px; font-size: 12px; }
+            .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #0284c7; padding-bottom: 8px; margin-bottom: 16px; }
+            h1 { margin: 0; font-size: 20px; color: #0f172a; }
+            .period { font-size: 14px; font-weight: bold; color: #0284c7; }
+            .summary-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+            .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center; }
+            .card-title { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px; }
+            .card-val { font-size: 16px; font-weight: 800; color: #0f172a; }
+            .surplus { color: #16a34a; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+            th { background: #0f172a; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
+            td { border-bottom: 1px solid #e2e8f0; padding: 6px 8px; font-size: 11px; }
+            .num { text-align: right; }
+            .subtotal { background: #f1f5f9; font-weight: bold; }
+            .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+            .tag-green { background: #dcfce7; color: #15803d; }
+            .tag-red { background: #fee2e2; color: #b91c1c; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <h1>Monthly Budget & Expense Statement</h1>
+              <div style="color: #64748b; margin-top: 2px;">Statement for: <strong style="color: #0f172a;">${d.userName}</strong> &bull; Personal Financial Tracker</div>
+            </div>
+            <div style="text-align: right;">
+              <div class="period">${d.periodLabel}</div>
+              <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Generated Statement</div>
+            </div>
+          </div>
+
+          <div class="summary-cards">
+            <div class="card"><div class="card-title">Monthly Net Salary</div><div class="card-val">₹${fmt(d.salary)}</div></div>
+            <div class="card"><div class="card-title">Total Planned Cap</div><div class="card-val">₹${fmt(d.totalCap)}</div></div>
+            <div class="card"><div class="card-title">Total Actual Spent</div><div class="card-val">₹${fmt(d.totalSpent)}</div></div>
+            <div class="card"><div class="card-title">Net Available Surplus</div><div class="card-val surplus">₹${fmt(d.surplus)}</div></div>
+          </div>
+
+          <h3 style="margin: 12px 0 6px 0; color: #0284c7;">Essential Needs</h3>
+          <table>
+            <thead>
+              <tr><th>Category</th><th class="num">Budget Limit</th><th class="num">Actual Spent</th><th class="num">Remaining Balance</th><th class="num">% of Limit</th></tr>
+            </thead>
+            <tbody>
+              ${d.needsRows.map(r => `
+                <tr>
+                  <td>${r.category}</td>
+                  <td class="num">₹${fmt(r.limit)}</td>
+                  <td class="num">₹${fmt(r.spent)}</td>
+                  <td class="num">₹${fmt(r.remaining)}</td>
+                  <td class="num"><span class="tag ${r.remaining >= 0 ? 'tag-green' : 'tag-red'}">${r.pctUsed}%</span></td>
+                </tr>`).join('')}
+              <tr class="subtotal">
+                <td>Subtotal Essential Needs</td>
+                <td class="num">₹${fmt(d.totalNeedsLimit)}</td>
+                <td class="num">₹${fmt(d.totalNeedsSpent)}</td>
+                <td class="num">₹${fmt(d.totalNeedsLimit - d.totalNeedsSpent)}</td>
+                <td class="num">-</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 style="margin: 14px 0 6px 0; color: #10b981;">Wants & Lifestyle</h3>
+          <table>
+            <thead>
+              <tr><th>Category</th><th class="num">Budget Limit</th><th class="num">Actual Spent</th><th class="num">Remaining Balance</th><th class="num">% of Limit</th></tr>
+            </thead>
+            <tbody>
+              ${d.wantsRows.map(r => `
+                <tr>
+                  <td>${r.category}</td>
+                  <td class="num">₹${fmt(r.limit)}</td>
+                  <td class="num">₹${fmt(r.spent)}</td>
+                  <td class="num">₹${fmt(r.remaining)}</td>
+                  <td class="num"><span class="tag ${r.remaining >= 0 ? 'tag-green' : 'tag-red'}">${r.pctUsed}%</span></td>
+                </tr>`).join('')}
+              <tr class="subtotal">
+                <td>Subtotal Wants & Lifestyle</td>
+                <td class="num">₹${fmt(d.totalWantsLimit)}</td>
+                <td class="num">₹${fmt(d.totalWantsSpent)}</td>
+                <td class="num">₹${fmt(d.totalWantsLimit - d.totalWantsSpent)}</td>
+                <td class="num">-</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top: 20px; font-size: 10px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+            Generated on ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} &bull; Personal Financial Tracker
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(() => { window.print(); }, 300);
+            };
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function setupExportMenu() {
+      const exportMenuBtn = document.getElementById('exportMenuBtn');
+      const exportMenu = document.getElementById('exportMenu');
+      const excelBtn = document.getElementById('exportExcelBtn');
+      const pdfBtn = document.getElementById('exportPdfBtn');
+
+      if (exportMenuBtn && exportMenu) {
+        exportMenuBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          exportMenu.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', () => {
+          exportMenu.classList.add('hidden');
+        });
+
+        exportMenu.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+      }
+
+      if (excelBtn) {
+        excelBtn.addEventListener('click', () => {
+          exportToExcel();
+          exportMenu.classList.add('hidden');
+        });
+      }
+
+      if (pdfBtn) {
+        pdfBtn.addEventListener('click', () => {
+          exportToPdf();
+          exportMenu.classList.add('hidden');
+        });
+      }
+    }
+
+    // ============================================================
+    // APPLICATION EVENT LISTENERS
+    // ============================================================
+    function setupPeriodDropdowns() {
+      const monthSelect = document.getElementById('monthSelect');
+      const yearSelect = document.getElementById('yearSelect');
+      if (!monthSelect || !yearSelect) return;
+
+      const handlePeriodChange = async () => {
+        clearTimeout(saveTimeout);
+        saveCurrentPeriod(); // flush pending edits to the month we're leaving
+        const m = String(monthSelect.value).padStart(2, '0');
+        const y = String(yearSelect.value);
+        currentPeriod = `${y}-${m}`;
+
+        await loadPeriodState(currentPeriod);
+        refreshUIFromState();
+      };
+
+      monthSelect.addEventListener('change', handlePeriodChange);
+      yearSelect.addEventListener('change', handlePeriodChange);
+    }
+
+    function setupUserNameListener() {
+      const userNameInput = document.getElementById('userNameInput');
+      if (!userNameInput) return;
+
+      userNameInput.addEventListener('input', () => {
+        appState.userName = userNameInput.value.trim() || "Pranay Kardekar";
+        try {
+          localStorage.setItem('budget_user_name', appState.userName);
+        } catch (e) {}
+        triggerAutoSave();
+      });
+    }
+
+    function setupSalaryListener() {
+      const salaryInput = document.getElementById('salaryInput');
+      if (!salaryInput) return;
+
+      salaryInput.addEventListener('focus', () => {
+        salaryInput.value = appState.salary || '';
+      });
+
+      salaryInput.addEventListener('input', () => {
+        const val = parseNum(salaryInput.value);
+        appState.salary = val;
+        recalcTotals();
+        triggerAutoSave();
+      });
+
+      salaryInput.addEventListener('blur', () => {
+        salaryInput.value = fmt(appState.salary);
+      });
+    }
+
+    function setupBackupAndRestore() {
+      const backupBtn = document.getElementById('backupBtn');
+      const restoreBtn = document.getElementById('restoreBtn');
+
+      if (backupBtn) {
+        backupBtn.addEventListener('click', () => {
+          saveCurrentPeriod();
+          const backupIcon = backupBtn.querySelector('i');
+          const original = backupIcon.className;
+          backupIcon.className = 'fa-solid fa-check text-emerald-500';
+          setTimeout(() => { backupIcon.className = original; }, 1200);
+        });
+      }
+
+      if (restoreBtn) {
+        restoreBtn.addEventListener('click', async () => {
+          const loaded = await loadPeriodState(currentPeriod);
+          if (loaded) {
+            refreshUIFromState();
+            const restoreIcon = restoreBtn.querySelector('i');
+            const orig = restoreIcon.className;
+            restoreIcon.className = 'fa-solid fa-check text-sky-500';
+            setTimeout(() => { restoreIcon.className = orig; }, 1200);
+          }
+        });
+      }
+    }
+
+    function setupAccordions() {
+      const toggleNeeds = document.getElementById('toggleNeeds');
+      const containerNeeds = document.getElementById('needs_container');
+      const chevronNeeds = document.getElementById('needs_chevron');
+
+      if (toggleNeeds && containerNeeds) {
+        toggleNeeds.addEventListener('click', () => {
+          const isHiddenNeeds = containerNeeds.classList.toggle('hidden');
+          chevronNeeds.style.transform = isHiddenNeeds ? 'rotate(180deg)' : 'rotate(0deg)';
+        });
+      }
+
+      const toggleWants = document.getElementById('toggleWants');
+      const containerWants = document.getElementById('wants_container');
+      const chevronWants = document.getElementById('wants_chevron');
+
+      if (toggleWants && containerWants) {
+        toggleWants.addEventListener('click', () => {
+          const isHiddenWants = containerWants.classList.toggle('hidden');
+          chevronWants.style.transform = isHiddenWants ? 'rotate(180deg)' : 'rotate(0deg)';
+        });
+      }
+    }
+
+    function setupReset() {
+      const resetBtn = document.getElementById('resetBtn');
+      if (!resetBtn) return;
+
+      resetBtn.addEventListener('click', () => {
+        if (Object.keys(appState.dailySpend).length && !confirm("Reset will also clear this month's daily log. Continue?")) return;
+        appState.dailySpend = {};
+        appState.realSurplus = null;
+        appState.salary = 45846;
+        Object.keys(CATEGORIES).forEach(k => {
+          appState.items[k] = {
+            limit: CATEGORIES[k].defaultLimit,
+            spent: 0
+          };
+        });
+
+        refreshUIFromState();
+        saveCurrentPeriod();
+      });
+    }
+
+    // ============================================================
+    // INITIALIZATION ON WINDOW LOAD
+    // ============================================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      initTheme();
+      initTabs();
+      await initIndexedDB();
+
+      const savedPeriod = localStorage.getItem('last_selected_period') || getCookie('last_selected_period') || '2026-11';
+      currentPeriod = savedPeriod;
+      
+      const parts = currentPeriod.split('-');
+      if (parts.length === 2) {
+        const yearSelect = document.getElementById('yearSelect');
+        const monthSelect = document.getElementById('monthSelect');
+        if (yearSelect) yearSelect.value = parts[0];
+        if (monthSelect) monthSelect.value = String(parseInt(parts[1], 10));
+      }
+
+      await loadPeriodState(currentPeriod);
+
+      const userNameInput = document.getElementById('userNameInput');
+      const savedName = localStorage.getItem('budget_user_name');
+      if (savedName) {
+        appState.userName = savedName;
+      }
+      if (userNameInput) {
+        userNameInput.value = appState.userName || "Pranay Kardekar";
+      }
+
+      const salaryInput = document.getElementById('salaryInput');
+      if (salaryInput) salaryInput.value = fmt(appState.salary);
+
+      renderCategoryCards();
+
+      Object.keys(CATEGORIES).forEach(k => {
+        updateItemUI(k);
+      });
+
+      recalcTotals();
+      syncRealInput();
+      setupRealSurplus();
+      setupDaily();
+      syncEntryDate();
+      setupPeriodDropdowns();
+      setupUserNameListener();
+      setupSalaryListener();
+      setupAccordions();
+      setupReset();
+      setupBackupAndRestore();
+      setupExportMenu();
+    });
+  </script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>{if(/\/(budget|health)\/$/.test(r.scope))r.unregister()})).catch(()=>{})}</script>
+</body>
+</html>
