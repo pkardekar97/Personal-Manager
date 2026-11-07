@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Daily Health Tracker</title>
-<meta name="theme-color" content="#060a14"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#060a14"><link rel="icon" href="../icons/icon-192.png"><link rel="apple-touch-icon" href="../icons/icon-192.png">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("hf-theme")||"dark"}catch(e){}</script>
 <style>
 :root{--bg:#f4f7f6;--card:#fff;--ink:#14282a;--mute:#5d7274;--line:#dfe8e6;--acc:#0e8f84;--acc2:#e1f4f1;--wat:#2f7de1;--sl:#6b5bd6;--sc:#d9822b;--md:#2e9a58;padding-top:env(safe-area-inset-top,0)}
@@ -99,7 +99,6 @@ const save=()=>{try{localStorage.setItem("hf-v2",JSON.stringify(S))}catch(e){}};
 const D=k=>S.days[k]||(S.days[k]={w:0,e:0,wl:0,wd:0,sl:0,kg:0,mo:0,m:{}});
 let cur=key(new Date());const WG=8,WM=15,EG=30;
 const TG=["💡 Did you know?","🪔 Desi wisdom","🔥 Fuel up","🏃 Try today"];
-// [tag, English, Hindi, source]   tag: 0 fact · 1 wisdom (quote) · 2 push (quote) · 3 tip
 const FQ=[
 [0,"The UN declared 21 June International Day of Yoga after India proposed it, and a record 175 countries co-sponsored the resolution.","भारत के प्रस्ताव पर संयुक्त राष्ट्र ने 21 जून को अंतरराष्ट्रीय योग दिवस घोषित किया, और रिकॉर्ड 175 देशों ने इसका समर्थन किया।","UN, 2014"],
 [0,"Well over 1,500 years ago, the Sushruta Samhita described surgeries like rebuilding a damaged nose. Indian medicine has been thinking about the body for a very long time.","1,500 साल से भी पहले सुश्रुत संहिता में नाक की पुनर्रचना जैसी सर्जरी का वर्णन मिलता है। भारतीय चिकित्सा शरीर के बारे में बहुत पहले से सोचती आई है।","Sushruta Samhita"],
@@ -127,7 +126,7 @@ const FQ=[
 [3,"Take your next phone call while walking. Free minutes towards your 30.","अगला फ़ोन कॉल चलते-चलते लें। आपके 30 मिनट में मुफ़्त जुड़ेंगे।",""],
 [3,"Swap one tea-time biscuit for a handful of roasted chana. Same crunch, more protein.","चाय के साथ एक बिस्किट की जगह मुट्ठी भर भुना चना लें। वही कुरकुरापन, ज़्यादा प्रोटीन।",""],
 [3,"Have chaas with lunch instead of a cold drink. Light, hydrating and thoroughly desi.","आज खाने के साथ कोल्ड ड्रिंक की जगह छाछ लें। हल्की, ताज़गी भरी और पूरी देसी।",""]];
-{// pick one that hasn't been shown yet; start over only after every item has been seen
+{
 let seen=[];try{seen=JSON.parse(localStorage.getItem("hf-qs")||"[]")}catch(e){}
 let pool=FQ.map((_,i)=>i).filter(i=>!seen.includes(i));if(!pool.length){pool=FQ.map((_,i)=>i);seen=[]}
 const ix=pool[Math.floor(Math.random()*pool.length)];seen.push(ix);try{localStorage.setItem("hf-qs",JSON.stringify(seen))}catch(e){}

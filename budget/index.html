@@ -5,25 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>Budget Calculator & Analytics Widget</title>
   
-  
   <meta name="theme-color" content="#0b0c0e">
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/tailwind.css">
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="apple-touch-icon" href="../icons/icon-192.png">
 
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <!-- Chart.js CDN for Long-Term Visualizations -->
-  <script src="vendor/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-400-normal.woff2') format('woff2');}
-    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:500;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-500-normal.woff2') format('woff2');}
-    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:600;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-600-normal.woff2') format('woff2');}
-    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:700;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-700-normal.woff2') format('woff2');}
-    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:800;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-800-normal.woff2') format('woff2');}
-    
     * {
       box-sizing: border-box;
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -45,7 +50,6 @@
       margin: 0;
       padding: 0;
       z-index: 20;
-      /* Track itself ignores touches so swipes that start off the thumb scroll the page */
       pointer-events: none;
       touch-action: pan-y pinch-zoom;
     }
@@ -61,7 +65,7 @@
       border: 2.5px solid #0284c7;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(56, 189, 248, 0.25);
       cursor: grab;
-      pointer-events: auto; /* only the thumb is draggable */
+      pointer-events: auto;
       touch-action: pan-y pinch-zoom;
       transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
@@ -86,7 +90,7 @@
       border: 2.5px solid #0284c7;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(56, 189, 248, 0.25);
       cursor: grab;
-      pointer-events: auto; /* only the thumb is draggable */
+      pointer-events: auto;
       transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
 
@@ -96,10 +100,8 @@
 
     .spend-range-slider::-moz-range-thumb:active {
       cursor: grabbing;
-      transform: scale(1.35);
     }
 
-    /* Larger thumb hit area on touch screens, since the track no longer accepts taps */
     @media (pointer: coarse) {
       .spend-range-slider::-webkit-slider-thumb { width: 26px; height: 26px; }
       .spend-range-slider::-moz-range-thumb { width: 26px; height: 26px; }
@@ -541,7 +543,6 @@
   <!-- JAVASCRIPT LOGIC ENGINE -->
   <!-- ============================================================ -->
   <script>
-    // Complete Baseline Categories: initial spent defaults to 0 across all items
     const CATEGORIES = {
       emi:       { name: "EMI / Loan Payments",       group: "needs", defaultLimit: 10000, defaultSpent: 0 },
       domestic:  { name: "Domestic Help",            group: "needs", defaultLimit: 2500,  defaultSpent: 0 },
@@ -562,14 +563,12 @@
       misc:      { name: "Miscellaneous / Unplanned",group: "wants", defaultLimit: 1500,  defaultSpent: 0 }
     };
 
-    // Calculate dynamic slider max ceiling anchored tightly to limit (~1.25x with buffer)
     function computeSliderCeiling(limit, spent) {
       const baseLimit = Math.max(limit || 0, 500);
       const targetMax = Math.ceil(baseLimit * 1.25);
       return Math.max(targetMax, Math.ceil((spent || 0) * 1.15));
     }
 
-    // Application State
     let currentPeriod = "2026-11";
     let appState = {
       userName: "Pranay Kardekar",
@@ -577,17 +576,14 @@
       items: {}
     };
 
-    // Storage Keys
     const DB_NAME = 'MultiMonthBudgetDB_v2';
     const STORE_NAME = 'monthly_records';
     let dbInstance = null;
 
-    // Chart.js Instances
     let chartCashflow = null;
     let chartBudgetRule = null;
     let chartCategoryShare = null;
 
-    // Helper: Rupee Number Formatter
     function fmt(num) {
       return (Number(num) || 0).toLocaleString('en-IN');
     }
@@ -597,7 +593,6 @@
       return Number(String(str || '0').replace(/[^0-9.-]+/g, '')) || 0;
     }
 
-    // Color logic: <80% Sky-blue, 80-100% Amber, >100% Red
     function getStatusTheme(spent, limit) {
       const ratio = limit > 0 ? (spent / limit) : 0;
       if (ratio > 1.0) {
@@ -627,9 +622,6 @@
       }
     }
 
-    // ============================================================
-    // THEME MANAGEMENT (Light / Dark Mode)
-    // ============================================================
     function initTheme() {
       const savedTheme = localStorage.getItem('budget_theme') || 'dark';
       applyTheme(savedTheme);
@@ -662,9 +654,6 @@
       }
     }
 
-    // ============================================================
-    // TAB MANAGEMENT (Planner vs. Analytics)
-    // ============================================================
     const TAB_ON = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-white dark:bg-[#202533] text-sky-600 dark:text-sky-300";
     const TAB_OFF = "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
     const TABS = { planner: ['tabPlannerBtn', 'plannerView'], analytics: ['tabAnalyticsBtn', 'analyticsView'], daily: ['tabDailyBtn', 'dailyView'] };
@@ -688,9 +677,6 @@
       }
     }
 
-    // ============================================================
-    // DOM GENERATION & CARD LISTENERS
-    // ============================================================
     function renderCategoryCards() {
       const needsContainer = document.getElementById('needs_container');
       const wantsContainer = document.getElementById('wants_container');
@@ -708,7 +694,6 @@
         card.className = "bg-white dark:bg-[#14171d] border border-slate-200 dark:border-[#212631] rounded-xl p-3.5 space-y-2.5 transition hover:border-slate-300 dark:hover:border-[#2d3443] shadow-sm";
         card.id = `card_${key}`;
         card.innerHTML = `
-          <!-- Header: Title & Editable Limit -->
           <div class="flex items-center justify-between text-xs">
             <span class="font-bold text-slate-800 dark:text-slate-200 text-sm tracking-tight truncate pr-2">${item.name}</span>
             <div class="flex items-center space-x-1 bg-slate-100 dark:bg-[#1a1f29] border border-slate-300 dark:border-[#2c3342] rounded-lg px-2 py-1">
@@ -723,13 +708,11 @@
             </div>
           </div>
 
-          <!-- Slider Container with dynamic Track and Red Limit Tick -->
           <div class="relative pt-1 pb-1">
             <div class="relative w-full h-1.5 bg-slate-200 dark:bg-[#1d232f] rounded-full overflow-hidden">
               <div id="track_fill_${key}" class="h-full rounded-full transition-all duration-75" style="width: 0%; background-color: #0ea5e9;"></div>
             </div>
             
-            <!-- Red Vertical Limit Tick Marker -->
             <div 
               id="limit_marker_${key}" 
               class="absolute top-1/2 -translate-y-1/2 w-1 h-3.5 bg-rose-500 rounded-sm pointer-events-none z-10 shadow-[0_0_8px_rgba(244,63,94,0.9)]" 
@@ -737,7 +720,6 @@
               style="left: 0%;"
             ></div>
 
-            <!-- Native Range Slider -->
             <input 
               id="slider_${key}" 
               type="range" 
@@ -749,14 +731,12 @@
             />
           </div>
 
-          <!-- Range Bounds & % of Limit -->
           <div class="flex justify-between items-center text-[11px]">
             <span class="text-slate-400">₹0</span>
             <span id="pct_label_${key}" class="font-semibold text-sky-500 dark:text-sky-400 text-xs">0% of limit</span>
             <span id="max_label_${key}" class="text-slate-400 font-mono">Max: ₹${fmt(maxLimit)}</span>
           </div>
 
-          <!-- Spent Row: Direct Editable Input Box + Remaining Badge -->
           <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-[#1a1f2a]">
             <div class="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#191d26] border border-slate-300 dark:border-[#272e3d] rounded-lg px-2.5 py-1 focus-within:border-sky-500 transition">
               <span class="text-slate-500 dark:text-slate-400 text-xs font-semibold">Spent: ₹</span>
@@ -895,7 +875,6 @@
       const surplus = salary - totalSpent;
       const savingsPotential = salary > 0 ? Math.round((surplus / salary) * 100) : 0;
 
-      // Top metric header cards
       const topSpentEl = document.getElementById('top_total_spent');
       const topCapSubEl = document.getElementById('top_total_cap_sub');
       const topSurplusEl = document.getElementById('top_surplus');
@@ -935,7 +914,6 @@
         }
       }
 
-      // Live Calculation Banner
       const mathSalary = document.getElementById('math_salary');
       const mathSpent = document.getElementById('math_spent');
       const mathResult = document.getElementById('math_result');
@@ -959,7 +937,6 @@
         }
       }
 
-      // Split ratio bar
       const needsTotalEl = document.getElementById('needs_total');
       const wantsTotalEl = document.getElementById('wants_total');
       const needsPctEl = document.getElementById('needs_pct');
@@ -984,9 +961,6 @@
       updateRealDiff(surplus);
     }
 
-    // ============================================================
-    // MULTI-PERIOD PERSISTENCE ENGINE
-    // ============================================================
     function getStorageKey(period) {
       return `budget_record_${period}`;
     }
@@ -1058,7 +1032,6 @@
       appState.realSurplus = null;
       let loaded = false;
 
-      // 1. Try Cookie
       const cookieData = getCookie(key);
       if (cookieData) {
         try {
@@ -1070,7 +1043,6 @@
         } catch (e) {}
       }
 
-      // 2. Try IndexedDB
       if (!loaded && dbInstance) {
         try {
           const tx = dbInstance.transaction(STORE_NAME, 'readonly');
@@ -1087,7 +1059,6 @@
         } catch (e) {}
       }
 
-      // 3. Try LocalStorage
       if (!loaded) {
         try {
           const raw = localStorage.getItem(key);
@@ -1117,7 +1088,7 @@
           if (Object.keys(row).length) ds[d] = row;
         });
       }
-      if (Array.isArray(data.dailyLog)) { // entries saved by the earlier version
+      if (Array.isArray(data.dailyLog)) {
         data.dailyLog.forEach(e => {
           if (e && e.date && CATEGORIES[e.cat] && Number(e.amt) > 0) {
             ds[e.date] = ds[e.date] || {};
@@ -1224,13 +1195,9 @@
       recalcTotals();
     }
 
-    // ============================================================
-    // ANNUAL ANALYTICS & CHART.JS ENGINE
-    // ============================================================
     async function getPeriodRecord(period) {
       const key = getStorageKey(period);
 
-      // 1. Check IndexedDB
       if (dbInstance) {
         try {
           const tx = dbInstance.transaction(STORE_NAME, 'readonly');
@@ -1244,13 +1211,11 @@
         } catch (e) {}
       }
 
-      // 2. Check LocalStorage
       try {
         const raw = localStorage.getItem(key);
         if (raw) return JSON.parse(raw);
       } catch (e) {}
 
-      // 3. Check Cookie
       const cookieData = getCookie(key);
       if (cookieData) {
         try {
@@ -1258,7 +1223,6 @@
         } catch (e) {}
       }
 
-      // Default fallback projection if user hasn't visited this month
       return null;
     }
 
@@ -1311,7 +1275,6 @@
         annualSpent += mSpent;
         annualSurplus += mSurplus;
 
-        // 50/30/20 breakdown
         const needsPct = sal > 0 ? Math.round((mNeeds / sal) * 100) : 0;
         const wantsPct = sal > 0 ? Math.round((mWants / sal) * 100) : 0;
         const savPct = sal > 0 ? Math.max(0, Math.round((mSurplus / sal) * 100)) : 0;
@@ -1324,14 +1287,12 @@
       const avgSavingsRate = annualIncome > 0 ? Math.round((annualSurplus / annualIncome) * 100) : 0;
       const spentShare = annualIncome > 0 ? Math.round((annualSpent / annualIncome) * 100) : 0;
 
-      // Update Top Annual KPI Cards
       document.getElementById('kpi_annual_income').textContent = `₹${fmt(annualIncome)}`;
       document.getElementById('kpi_annual_spent').textContent = `₹${fmt(annualSpent)}`;
       document.getElementById('kpi_sub_spent').textContent = `${spentShare}% of annual income`;
       document.getElementById('kpi_annual_surplus').textContent = `₹${fmt(annualSurplus)}`;
       document.getElementById('kpi_annual_rate').textContent = `${avgSavingsRate}%`;
 
-      // Render Charts
       renderCashflowChart(monthShort, salaries, spendings, surpluses, realArr);
       renderBudgetRuleChart(monthShort, needsPctArr, wantsPctArr, savingsPctArr);
       renderCategoryShareChart(categoryCumulative);
@@ -1457,19 +1418,19 @@
           labels: labels,
           datasets: [
             {
-              label: 'Needs (Target \u226450%)',
+              label: 'Needs (Target ≤50%)',
               data: needs,
               backgroundColor: '#0ea5e9',
               borderRadius: 3
             },
             {
-              label: 'Wants (Target \u226430%)',
+              label: 'Wants (Target ≤30%)',
               data: wants,
               backgroundColor: '#f59e0b',
               borderRadius: 3
             },
             {
-              label: 'Savings (Target \u226520%)',
+              label: 'Savings (Target ≥20%)',
               data: savings,
               backgroundColor: '#10b981',
               borderRadius: 3
@@ -1572,12 +1533,6 @@
       }
     }
 
-    // ============================================================
-    // EXPORT HANDLERS (Excel & PDF)
-    // ============================================================
-    // ============================================================
-    // REAL SURPLUS (bank reconciliation)
-    // ============================================================
     const $id = id => document.getElementById(id);
 
     function syncRealInput() {
@@ -1616,9 +1571,6 @@
       }
     }
 
-    // ============================================================
-    // DAILY SPEND LOG
-    // ============================================================
     let chartDaily = null;
     let dailyFilter = 'all';
     let entryDate = null;
@@ -1631,7 +1583,6 @@
       return { y, m, days: new Date(y, m, 0).getDate() };
     }
 
-    // The planner logs new spends against this date (today if the month is current, else the 1st)
     function syncEntryDate() {
       const el = $id('entryDate');
       if (!el) return;
@@ -1646,7 +1597,6 @@
       el.value = entryDate;
     }
 
-    // Called whenever a head's Spent changes: the difference is booked on / taken off days
     function recordSpendChange(key, oldVal, newVal) {
       const delta = r2((Number(newVal) || 0) - (Number(oldVal) || 0));
       if (!delta) return;
@@ -1671,7 +1621,6 @@
       }
     }
 
-    // Day-wise amounts can never exceed what the planner says was spent on that head
     function reconcileDaily() {
       const log = appState.dailySpend || (appState.dailySpend = {});
       Object.keys(CATEGORIES).forEach(k => {
@@ -1736,7 +1685,6 @@
       $id('daily_peak').textContent = peak > 0 ? `₹${fmt(peak)}` : '—';
       $id('daily_peak_sub').textContent = peak > 0 ? `on ${MONTHS_FULL[m - 1].slice(0, 3)} ${perDay.indexOf(peak) + 1}` : 'no spends yet';
 
-      // Spend that was never tied to a day (typed in before day tracking, or on another date's reduction)
       const undated = keys.map(k => {
         let dated = 0;
         dates.forEach(d => { dated += log[d][k] || 0; });
@@ -1847,7 +1795,7 @@
 
     function exportToExcel() {
       const d = getExportData();
-      let csv = "\uFEFF"; // UTF-8 BOM
+      let csv = "\uFEFF";
       csv += `Monthly Budget Report - ${d.periodLabel}\n`;
       csv += `Budget Planner,"${d.userName}"\n`;
       csv += `Monthly Net Salary,Rs. ${d.salary}\n`;
@@ -2034,9 +1982,6 @@
       }
     }
 
-    // ============================================================
-    // APPLICATION EVENT LISTENERS
-    // ============================================================
     function setupPeriodDropdowns() {
       const monthSelect = document.getElementById('monthSelect');
       const yearSelect = document.getElementById('yearSelect');
@@ -2044,7 +1989,7 @@
 
       const handlePeriodChange = async () => {
         clearTimeout(saveTimeout);
-        saveCurrentPeriod(); // flush pending edits to the month we're leaving
+        saveCurrentPeriod();
         const m = String(monthSelect.value).padStart(2, '0');
         const y = String(yearSelect.value);
         currentPeriod = `${y}-${m}`;
@@ -2163,9 +2108,6 @@
       });
     }
 
-    // ============================================================
-    // INITIALIZATION ON WINDOW LOAD
-    // ============================================================
     window.addEventListener('DOMContentLoaded', async () => {
       initTheme();
       initTabs();
