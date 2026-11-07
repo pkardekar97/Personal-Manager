@@ -1798,12 +1798,12 @@
       let csv = "\uFEFF";
       csv += `Monthly Budget Report - ${d.periodLabel}\n`;
       csv += `Budget Planner,"${d.userName}"\n`;
-      csv += `Monthly Net Salary,Rs. ${d.salary}\n`;
-      csv += `Total Planned Cap,Rs. ${d.totalCap}\n`;
-      csv += `Total Spent,Rs. ${d.totalSpent}\n`;
-      csv += `Net Available Surplus,Rs. ${d.surplus}\n`;
+      csv += `Monthly Net Salary,₹${d.salary}\n`;
+      csv += `Total Planned Cap,₹${d.totalCap}\n`;
+      csv += `Total Spent,₹${d.totalSpent}\n`;
+      csv += `Net Available Surplus,₹${d.surplus}\n`;
       csv += `Savings Potential,${d.savingsRate}%\n`;
-      csv += `Real Surplus in Bank,${appState.realSurplus == null ? 'Not entered' : 'Rs. ' + appState.realSurplus}\n\n`;
+      csv += `Real Surplus in Bank,${appState.realSurplus == null ? 'Not entered' : '₹' + appState.realSurplus}\n\n`;
 
       csv += `Section,Category,Budget Limit (Rs.),Actual Spent (Rs.),Remaining (Rs.),Status (% Used)\n`;
       d.needsRows.forEach(r => {

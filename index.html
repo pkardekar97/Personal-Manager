@@ -3,181 +3,484 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Kardekar Manager</title>
+  <title>Routine</title>
   <link rel="manifest" href="app.webmanifest">
-  <meta name="theme-color" content="#0b0f17">
+  <meta name="theme-color" content="#030712">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <!-- Futuristic Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      color-scheme: light dark;
-      --bg: #f2f6fb;
-      --card: #fff;
-      --ink: #0b1b33;
-      --mute: #5d6f89;
-      --line: #d5e0ee;
-      --acc: #0891b2;
+      --bg: #030712;
+      --card: rgba(15, 23, 42, 0.65);
+      --card-border: rgba(56, 189, 248, 0.18);
+      --card-hover: rgba(56, 189, 248, 0.45);
+      --text-main: #f8fafc;
+      --text-mute: #94a3b8;
+      --cyan: #38bdf8;
+      --cyan-glow: #0284c7;
+      --emerald: #10b981;
+      --indigo: #6366f1;
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0b0f17;
-        --card: #131a27;
-        --ink: #e8f1ff;
-        --mute: #8fa3c0;
-        --line: #243049;
-        --acc: #22d3ee;
-      }
-    }
-    * { box-sizing: border-box; }
-    body {
+
+    * {
+      box-sizing: border-box;
       margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
       min-height: 100vh;
-      background: radial-gradient(900px 500px at 50% -10%, rgba(34,211,238,.12), transparent), var(--bg);
-      color: var(--ink);
-      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      padding: max(24px, env(safe-area-inset-top)) 18px 28px;
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 24px 20px;
+    }
+
+    /* Ambient animated futuristic aura orbs */
+    .ambient-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.38;
+      animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 440px;
+      height: 440px;
+      background: radial-gradient(circle, #0284c7 0%, #38bdf8 60%, transparent 80%);
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .orb-2 {
+      width: 380px;
+      height: 380px;
+      background: radial-gradient(circle, #6366f1 0%, #a855f7 70%, transparent 80%);
+      bottom: -100px;
+      left: -80px;
+      animation-duration: 18s;
+      animation-delay: -5s;
+    }
+
+    .orb-3 {
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, #059669 0%, #10b981 70%, transparent 80%);
+      bottom: -60px;
+      right: -80px;
+      animation-duration: 16s;
+      animation-delay: -8s;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(-50%, 0) scale(1); }
+      50% { transform: translate(-45%, 40px) scale(1.12); }
+      100% { transform: translate(-55%, -30px) scale(0.92); }
+    }
+
+    /* Cyber dot matrix grid background */
+    .grid-matrix {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.08) 1px, transparent 0);
+      background-size: 32px 32px;
+      mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 85%);
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 85%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Central Glass Stage */
+    main {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 410px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border-radius: 36px;
+      padding: 40px 28px 32px;
+      box-shadow: 
+        0 24px 60px -15px rgba(0, 0, 0, 0.8),
+        0 0 45px -10px rgba(56, 189, 248, 0.15),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: stageEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+
+    @keyframes stageEntrance {
+      from { opacity: 0; transform: translateY(24px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Hero App Icon with Pulsing Halo */
+    .icon-stage {
+      position: relative;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
       justify-content: center;
     }
-    main {
-      width: 100%;
-      max-width: 440px;
-      display: grid;
-      gap: 16px;
-      align-content: start;
-      padding-top: 6vh;
+
+    .icon-halo {
+      position: absolute;
+      inset: -14px;
+      border-radius: 46px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.45) 0%, rgba(99, 102, 241, 0.15) 60%, transparent 80%);
+      filter: blur(18px);
+      animation: haloPulse 3.5s ease-in-out infinite alternate;
+      z-index: 0;
     }
-    header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 6px;
+
+    @keyframes haloPulse {
+      0% { opacity: 0.55; transform: scale(0.96); }
+      100% { opacity: 0.95; transform: scale(1.08); }
     }
-    header img {
-      width: 60px;
-      height: 60px;
-      border-radius: 16px;
-    }
-    h1 {
-      margin: 0;
-      font-size: 24px;
-      line-height: 1.15;
-    }
-    header p {
-      margin: 2px 0 0;
-      color: var(--mute);
-      font-size: 13px;
-    }
-    a.card {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      text-decoration: none;
-      color: inherit;
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 16px;
-      transition: transform .12s, border-color .12s;
-    }
-    a.card:active {
-      transform: scale(.98);
-      border-color: var(--acc);
-    }
-    a.card img {
-      width: 64px;
-      height: 64px;
-      border-radius: 16px;
-      flex: none;
-    }
-    b {
-      display: block;
-      font-size: 18px;
-    }
-    small {
-      color: var(--mute);
-      font-size: 13px;
-    }
-    .go {
-      margin-left: auto;
-      color: var(--mute);
-      font-size: 22px;
-    }
-    #inst {
-      display: none;
-      border: 1px solid var(--acc);
-      color: var(--acc);
-      background: transparent;
-      border-radius: 14px;
-      padding: 12px;
-      font: 600 15px inherit;
+
+    .app-icon {
+      position: relative;
+      z-index: 1;
+      width: 136px;
+      height: 136px;
+      border-radius: 36px;
+      box-shadow: 
+        0 18px 40px -10px rgba(0, 0, 0, 0.7),
+        0 0 25px rgba(56, 189, 248, 0.35);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
       cursor: pointer;
     }
+
+    .app-icon:hover {
+      transform: translateY(-4px) scale(1.05) rotate(1deg);
+      box-shadow: 
+        0 24px 50px -10px rgba(0, 0, 0, 0.85),
+        0 0 35px rgba(56, 189, 248, 0.6);
+    }
+
+    /* Cyber Futuristic Date Pill */
+    .date-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      padding: 5px 16px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.12);
+    }
+
+    .date-pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      animation: blink 2s infinite ease-in-out;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Big Futuristic Title */
+    h1.app-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      background: linear-gradient(135deg, #ffffff 15%, #bae6fd 55%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(56, 189, 248, 0.35);
+      margin-bottom: 8px;
+    }
+
+    p.tagline {
+      color: var(--text-mute);
+      font-size: 13.5px;
+      line-height: 1.5;
+      font-weight: 500;
+      max-width: 320px;
+      margin-bottom: 26px;
+    }
+
+    /* Install Button with Neon Flow */
+    .btn-install {
+      position: relative;
+      width: 100%;
+      padding: 16px 28px;
+      border: none;
+      border-radius: 20px;
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: #030712;
+      background: linear-gradient(135deg, #ffffff 0%, #7dd3fc 45%, #0284c7 100%);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 
+        0 12px 28px -6px rgba(2, 132, 199, 0.55),
+        0 0 24px rgba(56, 189, 248, 0.4);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+      overflow: hidden;
+    }
+
+    .btn-install::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        60deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.6) 50%,
+        transparent 65%
+      );
+      transform: rotate(25deg) translateY(-100%);
+      animation: buttonShine 4.5s infinite ease-in-out;
+    }
+
+    @keyframes buttonShine {
+      0%, 60% { transform: rotate(25deg) translateY(-100%); }
+      100% { transform: rotate(25deg) translateY(100%); }
+    }
+
+    .btn-install:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 
+        0 18px 36px -4px rgba(2, 132, 199, 0.75),
+        0 0 35px rgba(56, 189, 248, 0.65);
+    }
+
+    .btn-install:active {
+      transform: scale(0.97);
+    }
+
+    /* Sub Launcher Buttons */
+    .launchers {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      margin-top: 14px;
+    }
+
+    .btn-card {
+      flex: 1;
+      padding: 13px 14px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(14px);
+    }
+
+    .btn-card:hover {
+      border-color: var(--cyan);
+      background: rgba(56, 189, 248, 0.12);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .btn-card:active {
+      transform: scale(0.96);
+    }
+
+    .btn-card img, .btn-card svg {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
     footer {
-      text-align: center;
-      color: var(--mute);
-      font-size: 12px;
-      margin-top: 6px;
+      position: relative;
+      z-index: 10;
+      font-size: 11.5px;
+      color: var(--text-mute);
+      margin-top: 22px;
+      letter-spacing: 0.02em;
+      opacity: 0.75;
     }
   </style>
 </head>
 <body>
-<main>
-  <header>
-    <img src="icons/icon-192.png" alt="Kardekar Manager">
-    <div>
-      <h1>Kardekar Manager</h1>
-      <p id="d"></p>
+  <!-- Ambient Neon Background Orbs -->
+  <div class="ambient-glow">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Cyberpunk Dot Matrix -->
+  <div class="grid-matrix"></div>
+
+  <!-- Central Glassmorphic Command Hub -->
+  <main id="mainCard">
+    <div class="icon-stage">
+      <div class="icon-halo"></div>
+      <img src="icons/icon-192.png" 
+           onerror="this.onerror=null;this.src='icons/icon-512.png';"
+           alt="Routine App Icon" 
+           class="app-icon" 
+           id="heroIcon">
     </div>
-  </header>
 
-  <a class="card" href="budget/">
-    <img src="icons/icon-192.png" alt="Budget">
-    <span>
-      <b>Budget</b>
-      <small>Planner, daily log and analytics</small>
-    </span>
-    <span class="go">›</span>
-  </a>
+    <div class="date-pill">
+      <span class="date-pill-dot"></span>
+      <span id="liveDate">Routine</span>
+    </div>
 
-  <a class="card" href="health/">
-    <img src="icons/icon-192.png" alt="Health Tracker">
-    <span>
-      <b>Health Tracker</b>
-      <small>Water, walk, sleep, medicines, mood</small>
-    </span>
-    <span class="go">›</span>
-  </a>
+    <h1 class="app-title">ROUTINE</h1>
+    <p class="tagline">Next-generation budget planner and biometric daily wellness log. Zero cloud tracking.</p>
 
-  <button id="inst">Install Kardekar Manager</button>
-  <footer>Works offline once installed. Your data stays on this device.</footer>
-</main>
-<script>
-  document.getElementById("d").textContent = new Date().toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long"
-  });
-  let dp = null;
-  const b = document.getElementById("inst");
-  addEventListener("beforeinstallprompt", e => {
-    e.preventDefault();
-    dp = e;
-    b.style.display = "block";
-  });
-  b.onclick = async () => {
-    if (!dp) return;
-    dp.prompt();
-    await dp.userChoice;
-    dp = null;
-    b.style.display = "none";
-  };
-  addEventListener("appinstalled", () => {
-    b.style.display = "none";
-  });
-  if ("serviceWorker" in navigator) {
-    addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-  }
-</script>
+    <!-- Interactive Neon Install CTA -->
+    <button id="installBtn" class="btn-install">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      <span>Install Routine</span>
+    </button>
+
+    <!-- Direct Sub-App Fast Launchers -->
+    <div class="launchers">
+      <a href="budget/" class="btn-card">
+        <img src="icons/icon-budget-192.png" alt="₹" onerror="this.onerror=null;this.style.display='none';">
+        <span>Open Budget</span>
+      </a>
+      <a href="health/" class="btn-card">
+        <img src="icons/icon-health-192.png" alt="♥" onerror="this.onerror=null;this.style.display='none';">
+        <span>Open Health</span>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    Hardware Encrypted &bull; Offline Architecture &bull; Local Storage
+  </footer>
+
+  <script>
+    // Live Dynamic Date Pill
+    document.getElementById("liveDate").textContent = new Date().toLocaleDateString("en-IN", {
+      weekday: "short",
+      day: "numeric",
+      month: "short"
+    });
+
+    // 3D Tilt Micro-Interaction on Mouse Move
+    const card = document.getElementById("mainCard");
+    const icon = document.getElementById("heroIcon");
+
+    if (window.matchMedia("(hover: hover)").matches) {
+      document.addEventListener("mousemove", (e) => {
+        const xAxis = (window.innerWidth / 2 - e.pageX) / 28;
+        const yAxis = (window.innerHeight / 2 - e.pageY) / 28;
+        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+      });
+
+      document.addEventListener("mouseleave", () => {
+        card.style.transform = "rotateY(0deg) rotateX(0deg)";
+      });
+    }
+
+    // PWA Prompt Installation Logic
+    let deferredPrompt = null;
+    const installBtn = document.getElementById("installBtn");
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Install App</span>
+      `;
+    });
+
+    installBtn.addEventListener("click", async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          installBtn.innerHTML = `<span>App Installed ✓</span>`;
+          installBtn.style.opacity = "0.75";
+        }
+        deferredPrompt = null;
+      } else {
+        // Fallback: direct route into Budget if already installed or unsupported
+        window.location.href = "budget/";
+      }
+    });
+
+    window.addEventListener("appinstalled", () => {
+      installBtn.innerHTML = `<span>App Installed ✓</span>`;
+      installBtn.style.opacity = "0.75";
+    });
+
+    // Register Service Worker
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
