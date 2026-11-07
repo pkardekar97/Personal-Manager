@@ -1,188 +1,183 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Daily Health Tracker</title>
-<meta name="theme-color" content="#060a14"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
-<script>try{document.documentElement.dataset.theme=localStorage.getItem("hf-theme")||"dark"}catch(e){}</script>
-<style>
-:root{--bg:#f4f7f6;--card:#fff;--ink:#14282a;--mute:#5d7274;--line:#dfe8e6;--acc:#0e8f84;--acc2:#e1f4f1;--wat:#2f7de1;--sl:#6b5bd6;--sc:#d9822b;--md:#2e9a58;padding-top:env(safe-area-inset-top,0)}
-:root[data-theme=dark]{--bg:#0d1718;--card:#142224;--ink:#e6f2f0;--mute:#93aaa8;--line:#243a3b;--acc:#3fd0c2;--acc2:#183436;--wat:#6aa6ff;--sl:#9f93ff;--sc:#f0a45a;--md:#5fd08a;color-scheme:dark}
-*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-.wrap{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-right)) 40px max(14px,env(safe-area-inset-left));overflow-x:clip}
-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}h1{font-size:20px;margin:0}.mute{color:var(--mute);font-size:13px}.tools{display:flex;gap:8px;align-items:center}
-button,input,select{font:inherit;color:var(--ink)}
-button{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px;min-height:44px;cursor:pointer;touch-action:manipulation}button:active{transform:scale(.97)}
-button.p{background:var(--acc);border-color:var(--acc);color:#fff}button.sm{min-height:36px;padding:4px 12px;font-size:14px;border-radius:99px}button.rs{color:#d64545;border-color:#d64545}
-input:not([type=checkbox]):not([type=radio]):not([type=range]),select{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-height:44px;width:100%;min-width:0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}.card h2{font-size:16px;margin:0 0 6px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.row>*{flex:1 1 120px;min-width:0}
-button.sw{position:relative;width:66px;height:36px;min-height:36px;padding:0 3px;border-radius:99px;display:flex;align-items:center;justify-content:space-between;background:var(--acc2)}
-.sw span{position:relative;z-index:1;width:28px;text-align:center;font-size:14px;line-height:28px}.sw i{position:absolute;top:3px;left:3px;width:28px;height:28px;border-radius:50%;background:var(--acc);transition:transform .2s}.sw[aria-checked=true] i{transform:translateX(30px)}
-.track{height:10px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:8px}.track i{display:block;height:100%;background:var(--acc)}
-.lnk{display:block;text-align:center;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-height:44px;font-weight:600}
-#toast{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0));max-width:380px;margin:auto;background:var(--ink);color:var(--bg);border-radius:14px;padding:12px 14px;text-align:center;display:none;z-index:60}#toast.on{display:block}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Kardekar Manager</title>
+  <link rel="manifest" href="app.webmanifest">
+  <meta name="theme-color" content="#0b0f17">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f2f6fb;
+      --card: #fff;
+      --ink: #0b1b33;
+      --mute: #5d6f89;
+      --line: #d5e0ee;
+      --acc: #0891b2;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b0f17;
+        --card: #131a27;
+        --ink: #e8f1ff;
+        --mute: #8fa3c0;
+        --line: #243049;
+        --acc: #22d3ee;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(900px 500px at 50% -10%, rgba(34,211,238,.12), transparent), var(--bg);
+      color: var(--ink);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      padding: max(24px, env(safe-area-inset-top)) 18px 28px;
+      display: flex;
+      justify-content: center;
+    }
+    main {
+      width: 100%;
+      max-width: 440px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+      padding-top: 6vh;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 6px;
+    }
+    header img {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+    header p {
+      margin: 2px 0 0;
+      color: var(--mute);
+      font-size: 13px;
+    }
+    a.card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: inherit;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+      transition: transform .12s, border-color .12s;
+    }
+    a.card:active {
+      transform: scale(.98);
+      border-color: var(--acc);
+    }
+    a.card img {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      flex: none;
+    }
+    b {
+      display: block;
+      font-size: 18px;
+    }
+    small {
+      color: var(--mute);
+      font-size: 13px;
+    }
+    .go {
+      margin-left: auto;
+      color: var(--mute);
+      font-size: 22px;
+    }
+    #inst {
+      display: none;
+      border: 1px solid var(--acc);
+      color: var(--acc);
+      background: transparent;
+      border-radius: 14px;
+      padding: 12px;
+      font: 600 15px inherit;
+      cursor: pointer;
+    }
+    footer {
+      text-align: center;
+      color: var(--mute);
+      font-size: 12px;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="icons/icon-192.png" alt="Kardekar Manager">
+    <div>
+      <h1>Kardekar Manager</h1>
+      <p id="d"></p>
+    </div>
+  </header>
 
-.val{font:700 28px/1.1 ui-monospace,Menlo,Consolas,monospace;margin:4px 0}
-#qs{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:28px;text-align:center;transition:opacity .4s;cursor:pointer}#qs.out{opacity:0}
-#qs p{font-size:clamp(20px,5.5vw,30px);line-height:1.4;font-weight:600;margin:0 0 12px}
-.gl{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px;justify-items:center}
-.gl b{width:100%;max-width:56px;height:64px;border:2px solid #8fd3ff;border-radius:6px 6px 16px 16px;background:var(--acc2);position:relative;overflow:hidden;cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
-.gl b::after{content:"";position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(#8fd3ff,#5db8ff);transition:height .4s}.gl b.f::after{height:92%}.gl b:active{transform:scale(.92)}
-input[type=range]{width:100%;min-height:36px;accent-color:var(--acc);margin-top:6px}
-.chk,.opt{display:flex;gap:10px;align-items:center;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:8px;cursor:pointer;font-weight:600}.opt{flex:1 1 120px;margin:0}
-.chk input,.opt input{width:22px;height:22px;accent-color:var(--md);margin:0}.chk:has(input:checked),.opt:has(input:checked){border-color:var(--md);background:var(--acc2)}
-.g{height:100px;display:flex;align-items:flex-end;gap:2px;position:relative;margin-top:8px;border-bottom:1px solid var(--line)}.g div{flex:1;border-radius:3px 3px 0 0;min-height:2px}
-.g u{position:absolute;left:0;right:0;border-top:1px dashed var(--mute)}.lb{display:flex;gap:2px;font-size:9px;color:var(--mute)}.lb span{flex:1;text-align:center}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:6px 3px;border-bottom:1px solid var(--line);text-align:center}th{color:var(--mute);font-weight:600}
-.pop{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:#0005;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.pop div{background:var(--card);border-radius:22px;padding:28px 24px;text-align:center;max-width:320px;box-shadow:0 20px 60px #0004}.pop h2{font-size:26px;margin:6px 0}
-.qb{height:6px;border-radius:9px;background:var(--line);overflow:hidden;margin:18px auto 6px;max-width:280px}.qb i{display:block;height:100%;width:100%;background:var(--acc);animation:qd 7s linear forwards}@keyframes qd{to{width:0}}
-.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1}
-.md{display:flex;gap:6px;margin-top:8px}.md button{flex:1;font-size:26px;padding:4px 0}.md button.on{background:var(--acc2);border-color:var(--acc)}
-.mc{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}.dose{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.dose span{flex:1 1 100%;font-weight:600}.dose .opt{flex:1 1 120px;margin:0}
-.st{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}.st .card{padding:10px 12px}.st .val{font-size:22px}
-td.ok{background:#2e9a5833}td.lo{background:#d9822b33}.ir{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.ir b{white-space:nowrap}
+  <a class="card" href="budget/">
+    <img src="icons/icon-192.png" alt="Budget">
+    <span>
+      <b>Budget</b>
+      <small>Planner, daily log and analytics</small>
+    </span>
+    <span class="go">›</span>
+  </a>
 
-/* futuristic skin */
-:root{--bg:#e9f2fb;--card:#ffffffb8;--ink:#0b1b33;--mute:#4f6788;--line:#c6dbef;--acc:#0088b8;--acc2:#e0f3fb;--wat:#1f7ae0;--sl:#7c5cf0;--sc:#e08a1e;--md:#12a566}
-:root[data-theme=dark]{--bg:#060a14;--card:#0d1526cc;--ink:#e8f1ff;--mute:#8aa0c0;--line:#1e2f4e;--acc:#00e5ff;--acc2:#0a2638;--wat:#38a8ff;--sl:#a78bfa;--sc:#ffb04a;--md:#2dffa0}
-body{background:radial-gradient(900px 520px at 90% -10%,#00e5ff22,transparent 60%),radial-gradient(700px 520px at -10% 25%,#a78bfa22,transparent 60%),var(--bg);background-attachment:fixed}
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.16;background-image:linear-gradient(var(--acc) 1px,transparent 1px),linear-gradient(90deg,var(--acc) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:linear-gradient(#000,transparent 80%);mask-image:linear-gradient(#000,transparent 80%)}
-h1{background:linear-gradient(90deg,var(--acc),var(--sl));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.04em}
-.card{position:relative;background:var(--card);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:18px;box-shadow:inset 0 0 0 1px #ffffff0a,0 10px 30px -14px #00b4d8aa}
-.card::before{content:"";position:absolute;left:18px;right:18px;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);opacity:.8}
-.card h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)}
-.val{text-shadow:0 0 16px #00e5ff55}
-button:hover{border-color:var(--acc)}button.p{background:linear-gradient(135deg,var(--acc),var(--sl));border:0;color:#fff;box-shadow:0 0 18px -4px var(--acc)}
-:root[data-theme=dark] button.p{color:#04121f}
-input:focus,select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px #00e5ff33}
-.sw i{background:linear-gradient(135deg,var(--acc),var(--sl));box-shadow:0 0 10px var(--acc)}button.sw{border-color:var(--acc)}
-.track i,.qb i{background:linear-gradient(90deg,var(--acc),var(--sl));box-shadow:0 0 10px var(--acc)}
-.gl b.f{box-shadow:0 0 16px #38a8ffaa}.gl b{border-color:var(--wat)}
-.chk:has(input:checked),.opt:has(input:checked),.chip.on,.md button.on{box-shadow:0 0 14px -4px var(--acc);border-color:var(--acc)}
-#qs{background:radial-gradient(640px 420px at 50% 40%,#00e5ff22,transparent 70%),var(--bg)}#qt{background:linear-gradient(90deg,var(--acc),var(--sl));-webkit-background-clip:text;background-clip:text;color:transparent}
-.g div{box-shadow:0 0 8px -2px currentColor}#qg{display:inline-block;padding:4px 14px;border:1px solid var(--acc);border-radius:99px;color:var(--acc);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;box-shadow:0 0 14px -4px var(--acc)}#qs .wrapq{max-width:640px}#qs.hold .qb i{animation-play-state:paused}#qs{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
-.pop div{border:1px solid var(--acc);box-shadow:0 0 40px -6px var(--acc)}
-</style></head><body>
-<div id="qs"><div class="wrapq"><div id="qg"></div><p id="qt"></p><p id="qh" style="font-size:clamp(17px,4.6vw,24px);color:var(--mute)"></p><div class="mute" id="qa"></div><div class="qb"><i></i></div><div class="mute" id="qc">7s · hold to pause</div><button id="qk" class="p" style="margin-top:14px">Skip →</button></div></div>
-<div class="wrap">
-<header><div><h1>Daily Health Tracker</h1><div class="mute" id="dt"></div></div><div class="tools"><button id="th" class="sw" role="switch" aria-checked="false" aria-label="Dark mode"><span>☀️</span><span>🌙</span><i></i></button><button id="rs" class="sm rs">Reset</button></div></header>
-<div class="tabs"><button class="p" data-p="t">📋 Today</button><button data-p="a">📊 Monthly analysis</button></div>
-<div id="pt"><div class="row"><div style="flex:2 1 180px"><label class="mute" for="nm">Name</label><input type="text" id="nm" maxlength="40" placeholder="Your name" autocomplete="name"></div><div style="flex:1 1 80px"><label class="mute" for="age">Age</label><input type="number" id="age" min="1" max="120" inputmode="numeric"></div></div>
-<div class="row"><div><label class="mute" for="day">Date</label><input type="date" id="day"></div><div><label class="mute" for="kg">Weight (kg)</label><input type="number" id="kg" inputmode="decimal" step="0.1" min="0" max="300"></div></div>
-<div class="grid" style="margin-top:12px">
-<section class="card"><h2>💧 Water</h2><div class="val" id="wv"></div><div class="mute">Goal 8 glasses · tap a glass to fill it</div><div class="gl" id="wg"></div></section>
-<section class="card"><h2>🏃 Exercise</h2><div class="val" id="ev"></div><div class="mute" id="eg"></div>
-<label class="mute" for="er" style="display:block;margin-top:8px">Total walk time</label><input type="range" id="er" min="0" max="120" step="5">
-<label class="chk"><input type="checkbox" id="c1">Lunch · post-meal walk</label><label class="chk"><input type="checkbox" id="c2">Dinner · post-meal walk</label></section>
-<section class="card"><h2>🌙 Sleep</h2><div class="val" id="sv"></div><label class="mute" for="sh">Hours slept</label><input type="number" id="sh" min="0" max="24" step="0.5" inputmode="decimal" placeholder="e.g. 7"><div class="mute" id="ss" style="margin-top:6px"></div></section>
-<section class="card"><h2>💊 Medicine</h2><div class="mute">Are you on medication?</div><div class="row"><label class="opt"><input type="radio" name="om" value="y">Yes</label><label class="opt"><input type="radio" name="om" value="n">No</label></div>
-<div id="mq" hidden><div id="mcfg"></div><div class="mute" style="margin-top:12px">Today’s doses · tick “Taken” after each dose</div><div id="dz"></div></div></section>
-<section class="card"><h2>🙂 Mood</h2><div class="mute">How are you feeling today?</div><div class="md" id="mdr"></div></section>
-</div>
-</div>
-<div id="pa" hidden><div class="row" style="align-items:center;flex-wrap:nowrap"><button id="pm" aria-label="Previous month" style="flex:0 0 48px">◀</button><b id="am" style="text-align:center;flex:1"></b><button id="nx" aria-label="Next month" style="flex:0 0 48px">▶</button></div>
-<div class="grid st" id="sm" style="margin-top:12px"></div>
-<section class="card" style="margin-top:12px"><h2>🔗 How your habits connect to your mood</h2><div id="ins"></div></section>
-<div class="grid" id="gr" style="margin-top:12px"></div>
-<section class="card" style="margin-top:12px"><h2>Monthly log</h2><div class="mute">Green = goal met · Amber = below goal</div><div style="overflow-x:auto"><table id="tb"></table></div></section></div>
-<p class="mute" style="text-align:center">Saved on this device only.</p>
-</div><div id="toast"></div>
+  <a class="card" href="health/">
+    <img src="icons/icon-192.png" alt="Health Tracker">
+    <span>
+      <b>Health Tracker</b>
+      <small>Water, walk, sleep, medicines, mood</small>
+    </span>
+    <span class="go">›</span>
+  </a>
+
+  <button id="inst">Install Kardekar Manager</button>
+  <footer>Works offline once installed. Your data stays on this device.</footer>
+</main>
 <script>
-const $=i=>document.getElementById(i);
-const dk=()=>document.documentElement.dataset.theme==="dark";
-function setT(t){document.documentElement.dataset.theme=t;$("th").setAttribute("aria-checked",t==="dark");try{localStorage.setItem("hf-theme",t)}catch(e){}}
-setT(document.documentElement.dataset.theme||"light");$("th").onclick=()=>setT(dk()?"light":"dark");
-function toast(m){$("toast").textContent=m;$("toast").classList.add("on");setTimeout(()=>$("toast").classList.remove("on"),2200)}
-
-const pad=n=>String(n).padStart(2,"0"),key=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
-let S={days:{},med:"",meds:[],name:"",age:0};try{Object.assign(S,JSON.parse(localStorage.getItem("hf-v2")||"{}"))}catch(e){}
-const save=()=>{try{localStorage.setItem("hf-v2",JSON.stringify(S))}catch(e){}};
-const D=k=>S.days[k]||(S.days[k]={w:0,e:0,wl:0,wd:0,sl:0,kg:0,mo:0,m:{}});
-let cur=key(new Date());const WG=8,WM=15,EG=30;
-const TG=["💡 Did you know?","🪔 Desi wisdom","🔥 Fuel up","🏃 Try today"];
-// [tag, English, Hindi, source]   tag: 0 fact · 1 wisdom (quote) · 2 push (quote) · 3 tip
-const FQ=[
-[0,"The UN declared 21 June International Day of Yoga after India proposed it, and a record 175 countries co-sponsored the resolution.","भारत के प्रस्ताव पर संयुक्त राष्ट्र ने 21 जून को अंतरराष्ट्रीय योग दिवस घोषित किया, और रिकॉर्ड 175 देशों ने इसका समर्थन किया।","UN, 2014"],
-[0,"Well over 1,500 years ago, the Sushruta Samhita described surgeries like rebuilding a damaged nose. Indian medicine has been thinking about the body for a very long time.","1,500 साल से भी पहले सुश्रुत संहिता में नाक की पुनर्रचना जैसी सर्जरी का वर्णन मिलता है। भारतीय चिकित्सा शरीर के बारे में बहुत पहले से सोचती आई है।","Sushruta Samhita"],
-[0,"Laughter Yoga began in a Mumbai park in 1995, when Dr Madan Kataria started a club with just five people. Today there are clubs in over 100 countries. Smile once more today!","लाफ्टर योग की शुरुआत 1995 में मुंबई के एक पार्क में डॉ. मदन कटारिया और सिर्फ़ पाँच लोगों से हुई थी। आज 100 से ज़्यादा देशों में इसके क्लब हैं। आज एक बार और मुस्कुराइए!",""],
-[0,"“Khaane ke baad sau kadam” is an old Indian habit, and science agrees: even 2–5 minutes of light walking after a meal can blunt the blood sugar spike. Tick those meal walks today!","“खाने के बाद सौ कदम” पुरानी भारतीय आदत है, और विज्ञान भी मानता है कि खाने के बाद 2–5 मिनट की हल्की सैर से ब्लड शुगर का उछाल कम हो सकता है।","Sports Medicine review, 2022"],
-[0,"Ayurveda names sleep (nidra), food (ahara) and disciplined living as the three pillars of life. Your 6–8 hours is not laziness. It’s a pillar.","आयुर्वेद में निद्रा, आहार और संयमित जीवन को जीवन के तीन स्तंभ कहा गया है। आपकी 6–8 घंटे की नींद आलस नहीं, एक स्तंभ है।","Charaka Samhita"],
-[0,"Gandhi’s 1930 Dandi March covered roughly 385 km in 24 days, almost all on foot. Your 30 minutes is a small step in a very Indian tradition.","गांधीजी की 1930 की दांडी यात्रा लगभग 385 किमी की थी, जो 24 दिनों में लगभग पैदल पूरी हुई। आपके 30 मिनट इसी परंपरा का एक छोटा कदम हैं।","Dandi March, 1930"],
-[0,"A matka cools water without electricity. Tiny pores let a little water seep out and evaporate, carrying heat away. Desi science! Now go fill those glasses.","मटका बिना बिजली के पानी ठंडा करता है। इसके बारीक छिद्रों से थोड़ा पानी बाहर आकर भाप बनता है और गर्मी ले जाता है। देसी विज्ञान! अब गिलास भर लीजिए।",""],
-[0,"India proposed it and the UN named 2023 the International Year of Millets. Ragi, jowar and bajra are rich in fibre, and ragi has far more calcium than rice or wheat.","भारत के प्रस्ताव पर संयुक्त राष्ट्र ने 2023 को अंतरराष्ट्रीय मिलेट वर्ष घोषित किया। रागी, ज्वार और बाजरा फ़ाइबर से भरपूर हैं, और रागी में चावल-गेहूँ से कहीं ज़्यादा कैल्शियम होता है।","UN, 2023"],
-[0,"India has plenty of sunshine, yet studies report that a large share of Indians are low in vitamin D. A short morning walk in the sun does double duty.","भारत में धूप भरपूर है, फिर भी कई अध्ययनों में बहुत से भारतीयों में विटामिन D की कमी पाई गई है। सुबह की धूप में थोड़ी सैर दोहरा फ़ायदा देती है।",""],
-[0,"WHO estimates that about half of people with long-term conditions don’t take medicines as prescribed. Every “Taken” tick you make puts you on the right side of that number.","WHO के अनुमान के अनुसार लंबे समय की बीमारियों वाले लगभग आधे लोग दवा बताए अनुसार नहीं लेते। हर “Taken” का टिक आपको सही तरफ़ रखता है।","WHO"],
-[0,"Ushapan, drinking water at dawn, is an old Ayurvedic habit. A glass first thing in the morning is the easiest way to start your 8.","उषःपान, यानी सुबह उठकर पानी पीना, एक पुरानी आयुर्वेदिक आदत है। सुबह का पहला गिलास आपके 8 गिलास की सबसे आसान शुरुआत है।",""],
-[0,"M. C. Mary Kom, from a farming family in Manipur, became a six-time World Amateur Boxing champion and won Olympic bronze in 2012. Big wins grow from ordinary daily practice.","मणिपुर के किसान परिवार की एम. सी. मैरी कॉम छह बार विश्व एमेच्योर बॉक्सिंग चैंपियन बनीं और 2012 में ओलंपिक कांस्य जीता। बड़ी जीत रोज़ के साधारण अभ्यास से बनती है।",""],
-[0,"The word “yoga” comes from the Sanskrit yuj, meaning to join. Body, breath and mind working together is the whole idea.","“योग” शब्द संस्कृत के ‘युज’ से बना है, जिसका अर्थ है जोड़ना। शरीर, साँस और मन का साथ आना ही इसका मूल विचार है।",""],
-[1,"Slowly, slowly, O mind, everything happens in its time. The gardener may water a hundred pots, but fruit comes only in its season.","धीरे-धीरे रे मना, धीरे सब कुछ होय। माली सींचे सौ घड़ा, ऋतु आए फल होय॥","Kabir"],
-[1,"You can’t cross the sea merely by standing and staring at the water.","सिर्फ़ खड़े होकर पानी को ताकते रहने से समुद्र पार नहीं होता।","Rabindranath Tagore"],
-[1,"Truly, the body is the first instrument of every duty.","शरीरमाद्यं खलु धर्मसाधनम्।","Kalidasa"],
-[1,"It is health that is real wealth, and not pieces of gold and silver.","असली धन सेहत है, सोने-चाँदी के टुकड़े नहीं।","Mahatma Gandhi"],
-[1,"Drop by drop, the pot fills.","बूँद-बूँद से घड़ा भरता है।","Hindi proverb"],
-[1,"Health is the greatest gift, contentment the greatest wealth.","सेहत सबसे बड़ा उपहार है, संतोष सबसे बड़ा धन।","Buddha"],
-[1,"The first happiness is a healthy body.","पहला सुख निरोगी काया।","Indian proverb"],
-[2,"Strength is life, weakness is death.","शक्ति ही जीवन है, कमज़ोरी ही मृत्यु।","Swami Vivekananda"],
-[2,"If you want to shine like the sun, first burn like the sun.","सूरज की तरह चमकना है तो पहले सूरज की तरह तपना होगा।","A. P. J. Abdul Kalam"],
-[3,"Drink a glass of water before your first chai today. Then fill the other seven.","आज पहली चाय से पहले एक गिलास पानी पिएँ। बाकी सात गिलास उसके बाद।",""],
-[3,"Take your next phone call while walking. Free minutes towards your 30.","अगला फ़ोन कॉल चलते-चलते लें। आपके 30 मिनट में मुफ़्त जुड़ेंगे।",""],
-[3,"Swap one tea-time biscuit for a handful of roasted chana. Same crunch, more protein.","चाय के साथ एक बिस्किट की जगह मुट्ठी भर भुना चना लें। वही कुरकुरापन, ज़्यादा प्रोटीन।",""],
-[3,"Have chaas with lunch instead of a cold drink. Light, hydrating and thoroughly desi.","आज खाने के साथ कोल्ड ड्रिंक की जगह छाछ लें। हल्की, ताज़गी भरी और पूरी देसी।",""]];
-{// pick one that hasn't been shown yet; start over only after every item has been seen
-let seen=[];try{seen=JSON.parse(localStorage.getItem("hf-qs")||"[]")}catch(e){}
-let pool=FQ.map((_,i)=>i).filter(i=>!seen.includes(i));if(!pool.length){pool=FQ.map((_,i)=>i);seen=[]}
-const ix=pool[Math.floor(Math.random()*pool.length)];seen.push(ix);try{localStorage.setItem("hf-qs",JSON.stringify(seen))}catch(e){}
-const q=FQ[ix],qm=q[0]===1||q[0]===2;$("qg").textContent=TG[q[0]];$("qt").textContent=qm?"“"+q[1]+"”":q[1];$("qh").textContent=q[2];$("qa").textContent=q[3]?"— "+q[3]:"";
-let n=7,hold=false;const sp=$("qs"),x=()=>{clearInterval(iv);sp.classList.add("out");setTimeout(()=>sp.remove(),400)},iv=setInterval(()=>{if(hold)return;n--;$("qc").textContent=Math.max(n,0)+"s · hold to pause";if(n<=0)x()},1000),hd=v=>{hold=v;sp.classList.toggle("hold",v);$("qc").textContent=v?"Paused · release to continue":Math.max(n,0)+"s · hold to pause"};sp.addEventListener("pointerdown",e=>{if(!e.target.closest("#qk"))hd(true)});["pointerup","pointercancel","pointerleave"].forEach(t=>sp.addEventListener(t,()=>hd(false)));sp.addEventListener("contextmenu",e=>e.preventDefault());$("qk").onclick=x}
-function gr(t,fn,goal,u,col){const[y,mo]=am.split("-").map(Number),n=new Date(y,mo,0).getDate();let v=[],s=0,c=0;
- for(let i=1;i<=n;i++){const d=S.days[y+"-"+pad(mo)+"-"+pad(i)],x=d?fn(d):0;v.push(x);if(x>0){s+=x;c++}}const mx=Math.max(goal,...v,1);
- return`<section class="card"><h2>${t}</h2><div class="mute">Average ${c?+(s/c).toFixed(1):"–"} ${u} · goal ${goal}</div><div class="g">${v.map((x,i)=>`<div title="Day ${i+1}: ${x}" style="height:${x/mx*100}%;background:${col}"></div>`).join("")}<u style="bottom:${goal/mx*100}%"></u></div><div class="lb">${v.map((_,i)=>`<span>${(i+1)%5==1?i+1:""}</span>`).join("")}</div></section>`}
-function render(){const d=D(cur),[y,mo]=cur.split("-").map(Number);
- $("day").value=cur;$("kg").value=d.kg||"";$("dt").textContent=(S.name?S.name+(S.age?", "+S.age+" yrs":"")+" · ":"")+new Date(cur+"T00:00").toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"});
- $("wv").textContent=d.w+" / "+WM+" glasses · "+d.w*250+" ml";$("wg").innerHTML=Array.from({length:WM},(_,i)=>`<b data-i="${i}" role="button" aria-label="Glass ${i+1}" class="${i<d.w?"f":""}"></b>`).join("");
- $("ev").textContent=d.e+" min";$("er").value=d.e;$("eg").textContent=d.e>=EG?"Goal reached ✓":"Goal: "+EG+" minutes";$("c1").checked=!!d.wl;$("c2").checked=!!d.wd;
- $("sh").value=d.sl||"";$("sv").textContent=d.sl?d.sl+" h":"–";const ok=d.sl>=6&&d.sl<=8;$("sv").style.color=ok?"var(--md)":"";
- $("ss").textContent=!d.sl?"Enter the hours you slept last night.":ok?"Healthy sleep ✓":d.sl<6?"A little short. Aim for 6–8 hours.":"Long sleep. 6–8 hours is ideal.";
- document.querySelectorAll("[name=om]").forEach(r=>r.checked=S.med===r.value);$("mq").hidden=S.med!=="y";renderDz(d);$("nm").value=S.name||"";$("age").value=S.age||"";$("mdr").innerHTML=["😞","😕","😐","🙂","😄"].map((e,i)=>`<button data-mo="${i+1}" class="${d.mo===i+1?"on":""}" aria-label="Mood ${i+1}">${e}</button>`).join("");
- renderA()}
-const up=f=>{f(D(cur));save();render()};
-function well(){const o=document.createElement("div");o.className="pop";o.innerHTML="<div><div style='font-size:56px'>🎉</div><h2>Well done!</h2></div>";document.body.appendChild(o);setTimeout(()=>o.remove(),2000)}
-$("wg").onclick=e=>{const b=e.target.closest("b");if(!b)return;const o=D(cur).w;up(d=>{const n=+b.dataset.i+1;d.w=n===d.w?n-1:n});if(o<WG&&D(cur).w>=WG)well()};
-$("day").onchange=e=>{if(e.target.value){cur=e.target.value;render()}};
-$("kg").onchange=e=>up(d=>d.kg=Math.max(0,Math.min(300,+e.target.value||0)));
-$("er").oninput=e=>up(d=>d.e=+e.target.value);$("c1").onchange=e=>up(d=>d.wl=e.target.checked?1:0);$("c2").onchange=e=>up(d=>d.wd=e.target.checked?1:0);
-$("sh").onchange=e=>up(d=>d.sl=Math.max(0,Math.min(24,+e.target.value||0)));
-document.querySelectorAll("[name=om]").forEach(r=>r.onchange=()=>{S.med=r.value;if(r.value==="y"&&!(S.meds||[]).length)S.meds=[newMed()];save();renderMedCfg();render()});
-let rt=null;$("rs").onclick=()=>{if(!rt){$("rs").textContent="Sure?";rt=setTimeout(()=>{rt=null;$("rs").textContent="Reset"},4000);return}clearTimeout(rt);rt=null;$("rs").textContent="Reset";delete S.days[cur];save();render();toast("This day was reset.")};
-
-const esc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const TS={1:["Daily"],2:["Lunch","Dinner"],3:["Breakfast","Lunch","Dinner"]},MJ=["😞","😕","😐","🙂","😄"];
-const newMed=()=>({id:Math.random().toString(36).slice(2,8),n:"",c:"",f:2,r:"b"});
-const doses=()=>{const a=[];(S.meds||[]).forEach(m=>{if(m.n&&m.n.trim())TS[m.f].forEach((z,j)=>a.push({k:m.id+"_"+j,n:m.n,l:m.f>1?(m.r==="a"?"After ":"Before ")+z.toLowerCase():(m.r==="a"?"After food":"Before food")}))});return a};
-function renderMedCfg(){$("mcfg").innerHTML=(S.meds||[]).map((m,i)=>`<div class="mc" data-i="${i}"><div class="row" style="flex-wrap:nowrap"><input type="text" data-k="n" value="${esc(m.n)}" placeholder="Medicine name" maxlength="40" aria-label="Medicine name"><button data-x="${i}" aria-label="Remove" style="flex:0 0 44px;padding:0">✕</button></div><div class="row"><input type="text" data-k="c" value="${esc(m.c)}" placeholder="Why? (e.g. BP, sugar, thyroid)" maxlength="40" aria-label="Cause"></div><div class="row"><select data-k="f" aria-label="Times a day">${[[1,"Once a day"],[2,"Twice a day · lunch & dinner"],[3,"3 times a day · breakfast, lunch, dinner"]].map(([v,l])=>`<option value="${v}"${v===m.f?" selected":""}>${l}</option>`).join("")}</select><select data-k="r" aria-label="Meal timing"><option value="b"${m.r!=="a"?" selected":""}>Before meal</option><option value="a"${m.r==="a"?" selected":""}>After meal</option></select></div></div>`).join("")+'<button id="madd" style="width:100%;margin-top:8px">+ Add medicine</button>'}
-function renderDz(d){const a=doses(),m=d.m||{};$("dz").innerHTML=a.length?a.map(x=>`<div class="dose"><span>${esc(x.n)} · ${x.l}</span><label class="opt"><input type="radio" name="${x.k}" value="y"${m[x.k]==="y"?" checked":""}>Taken</label><label class="opt"><input type="radio" name="${x.k}" value="n"${m[x.k]!=="y"?" checked":""}>Not taken</label></div>`).join(""):'<div class="mute">Enter a medicine name above to see today’s doses.</div>'}
-$("dz").onchange=e=>{if(e.target.type==="radio")up(d=>{d.m=d.m||{};d.m[e.target.name]=e.target.value})};
-$("mcfg").onchange=e=>{const t=e.target,c=t.closest(".mc");if(!c)return;const m=S.meds[+c.dataset.i],k=t.dataset.k;m[k]=k==="f"?+t.value:t.value.trim();save();render()};
-$("mcfg").onclick=e=>{if(e.target.closest("[data-x]")){S.meds.splice(+e.target.closest("[data-x]").dataset.x,1);save();renderMedCfg();render()}else if(e.target.closest("#madd")){S.meds.push(newMed());save();renderMedCfg();render()}};
-$("nm").onchange=e=>{S.name=e.target.value.trim();save();render()};$("age").onchange=e=>{S.age=Math.max(0,Math.min(120,+e.target.value||0));save();render()};
-$("mdr").onclick=e=>{const b=e.target.closest("button");if(b)up(d=>d.mo=d.mo===+b.dataset.mo?0:+b.dataset.mo)};
-document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{$("pt").hidden=b.dataset.p!=="t";$("pa").hidden=b.dataset.p!=="a";document.querySelectorAll("[data-p]").forEach(x=>x.classList.toggle("p",x===b));renderA()});
-let am=key(new Date()).slice(0,7);const sh=k=>{const[y,m]=am.split("-").map(Number),d=new Date(y,m-1+k,1);am=d.getFullYear()+"-"+pad(d.getMonth()+1);renderA()};$("pm").onclick=()=>sh(-1);$("nx").onclick=()=>sh(1);
-const GL={w:x=>x.w>=WG,e:x=>x.e>=EG,s:x=>x.sl>=6&&x.sl<=8},avg=a=>a.length?a.reduce((p,q)=>p+q,0)/a.length:0,f1=v=>v?+v.toFixed(1):"–";
-const medN=x=>{const m=x.m||{};return doses().filter(z=>m[z.k]==="y").length},medOK=x=>{const t=doses().length;return S.med==="y"&&t?medN(x)===t:null};
-function renderA(){if($("pa").hidden)return;const[y,mo]=am.split("-").map(Number),n=new Date(y,mo,0).getDate(),days=[];
- for(let i=1;i<=n;i++){const x=S.days[y+"-"+pad(mo)+"-"+pad(i)];if(x&&(x.w||x.e||x.wl||x.wd||x.sl||x.mo||medN(x)))days.push({i,x})}
- $("am").textContent=new Date(y,mo-1,1).toLocaleDateString("en-IN",{month:"long",year:"numeric"})+(S.name?" · "+S.name:"");
- const A=f=>avg(days.map(d=>f(d.x)).filter(v=>v>0)),md=days.filter(d=>d.x.mo>0),mdv=A(x=>x.mo),mk=days.map(d=>medOK(d.x)).filter(v=>v!==null),
- gm=avg(days.map(d=>[GL.w(d.x),GL.e(d.x),GL.s(d.x)].filter(Boolean).length));
- $("sm").innerHTML=[["📅 Days logged",days.length],["💧 Avg water",f1(A(x=>x.w))+" glasses"],["🏃 Avg walk",f1(A(x=>x.e))+" min"],["🌙 Avg sleep",f1(A(x=>x.sl))+" h"],["💊 Meds fully taken",mk.length?Math.round(mk.filter(Boolean).length/mk.length*100)+"%":"–"],["🙂 Avg mood",mdv?MJ[Math.round(mdv)-1]+" "+f1(mdv)+"/5":"–"],["🎯 Goals met / day",days.length?f1(gm)+" of 3":"–"]].map(([l,v])=>`<div class="card"><div class="mute">${l}</div><div class="val">${v}</div></div>`).join("");
- const cmp=(l,f)=>{const a=md.filter(d=>f(d.x)===true).map(d=>d.x.mo),b=md.filter(d=>f(d.x)===false).map(d=>d.x.mo);return a.length&&b.length?{l,a:avg(a),b:avg(b),df:avg(a)-avg(b)}:{l}};
- const rs=[cmp("slept 6–8 hours",x=>x.sl?GL.s(x):null),cmp("walked 30+ minutes",GL.e),cmp("drank 8+ glasses of water",GL.w)];if(S.med==="y"&&doses().length)rs.push(cmp("took all medicines",medOK));
- const best=rs.filter(r=>r.df>=0.3).sort((p,q)=>q.df-p.df)[0];
- $("ins").innerHTML=(md.length<3?'<div class="mute">Log your mood for a few days to see how sleep, walking, water and medicines relate to how you feel.</div>':"")+rs.map(r=>r.a===undefined?`<div class="ir"><span>On days you ${r.l}</span><span class="mute">need more days</span></div>`:`<div class="ir"><span>On days you ${r.l}</span><b>${r.a.toFixed(1)} vs ${r.b.toFixed(1)} ${r.df>0.1?"↑":r.df<-0.1?"↓":"="}</b></div>`).join("")+'<div class="mute" style="margin-top:6px">Average mood out of 5: on those days vs other days.</div>'+(best?`<p>💡 Your mood tends to be better on days you ${best.l}.</p>`:md.length>=3?"<p>💡 No strong pattern yet. Keep logging each day.</p>":"");
- $("gr").innerHTML=gr("💧 Water",x=>x.w,WG,"glasses","var(--wat)")+gr("🏃 Walk",x=>x.e,EG,"min","var(--acc)")+gr("🌙 Sleep",x=>x.sl,7,"h","var(--sl)")+gr("🙂 Mood",x=>x.mo,5,"/5","var(--sc)");
- const c=ok=>ok?"ok":"lo",tot=doses().length;
- $("tb").innerHTML="<tr><th>Day</th><th>Water</th><th>Walk</th><th>Meal walks</th><th>Sleep</th><th>Meds</th><th>Mood</th></tr>"+(days.map(({i,x})=>`<tr><td>${i}</td><td class="${c(GL.w(x))}">${x.w||"–"}</td><td class="${c(GL.e(x))}">${x.e||"–"}</td><td>${(x.wl?1:0)+(x.wd?1:0)}/2</td><td class="${x.sl?c(GL.s(x)):""}">${x.sl||"–"}</td><td class="${medOK(x)===null?"":c(medOK(x))}">${tot&&S.med==="y"?medN(x)+"/"+tot:"–"}</td><td>${MJ[x.mo-1]||"–"}</td></tr>`).join("")||'<tr><td colspan="7" class="mute">No entries yet</td></tr>')}
-renderMedCfg();
-render();
-</script><script>if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>{if(/\/(budget|health)\/$/.test(r.scope))r.unregister()})).catch(()=>{})}</script>
-</body></html>
+  document.getElementById("d").textContent = new Date().toLocaleDateString("en-IN", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
+  });
+  let dp = null;
+  const b = document.getElementById("inst");
+  addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    dp = e;
+    b.style.display = "block";
+  });
+  b.onclick = async () => {
+    if (!dp) return;
+    dp.prompt();
+    await dp.userChoice;
+    dp = null;
+    b.style.display = "none";
+  };
+  addEventListener("appinstalled", () => {
+    b.style.display = "none";
+  });
+  if ("serviceWorker" in navigator) {
+    addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  }
+</script>
+</body>
+</html>
