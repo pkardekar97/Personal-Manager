@@ -64,7 +64,7 @@ input:focus,select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3
 </style></head><body>
 <div id="qs"><div class="wrapq"><div id="qg"></div><p id="qt"></p><p id="qh" style="font-size:clamp(17px,4.6vw,24px);color:var(--mute)"></p><div class="mute" id="qa"></div><div class="qb"><i></i></div><div class="mute" id="qc">7s · hold to pause</div><button id="qk" class="p" style="margin-top:14px">Skip →</button></div></div>
 <div class="wrap">
-<header><div><h1>Daily Health Tracker</h1><div class="mute" id="dt"></div></div><div class="tools"><button id="th" class="sw" role="switch" aria-checked="false" aria-label="Dark mode"><span>☀️</span><span>🌙</span><i></i></button><button id="rs" class="sm rs">Reset</button></div></header>
+<header><div><h1>Daily Health Tracker</h1><div class="mute" id="dt"></div></div><div class="tools"><a href="../?home=1" title="Back to Routine Home" class="sm" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--acc);border-color:var(--acc);">🏠 Home</a><a href="../budget/" title="Switch to Budget Planner" class="sm" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--wat);border-color:var(--wat);">₹ Budget</a><button id="th" class="sw" role="switch" aria-checked="false" aria-label="Dark mode"><span>☀️</span><span>🌙</span><i></i></button><button id="rs" class="sm rs">Reset</button></div></header>
 <div class="tabs"><button class="p" data-p="t">📋 Today</button><button data-p="a">📊 Monthly analysis</button></div>
 <div id="pt"><div class="row"><div style="flex:2 1 180px"><label class="mute" for="nm">Name</label><input type="text" id="nm" maxlength="40" placeholder="Your name" autocomplete="name"></div><div style="flex:1 1 80px"><label class="mute" for="age">Age</label><input type="number" id="age" min="1" max="120" inputmode="numeric"></div></div>
 <div class="row"><div><label class="mute" for="day">Date</label><input type="date" id="day"></div><div><label class="mute" for="kg">Weight (kg)</label><input type="number" id="kg" inputmode="decimal" step="0.1" min="0" max="300"></div></div>
@@ -84,6 +84,15 @@ input:focus,select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3
 <section class="card" style="margin-top:12px"><h2>🔗 How your habits connect to your mood</h2><div id="ins"></div></section>
 <div class="grid" id="gr" style="margin-top:12px"></div>
 <section class="card" style="margin-top:12px"><h2>Monthly log</h2><div class="mute">Green = goal met · Amber = below goal</div><div style="overflow-x:auto"><table id="tb"></table></div></section></div>
+<div class="card" style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:radial-gradient(ellipse at 50% 50%, rgba(56,189,248,0.12), transparent 70%), var(--card);border-color:var(--wat);">
+  <div>
+    <h3 style="font-size:14px;margin:0;font-weight:800;color:var(--wat);">Monthly Budget & Expense Statement</h3>
+    <div class="mute" style="font-size:11px;margin-top:2px;">Track monthly net salary, expense limits, 50/30/20 rules & bank surplus</div>
+  </div>
+  <a href="../budget/" class="p" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:12px;font-weight:700;font-size:13px;">
+    <span>Open Budget</span> <span>→</span>
+  </a>
+</div>
 <p class="mute" style="text-align:center">Saved on this device only.</p>
 </div><div id="toast"></div>
 <script>
@@ -97,6 +106,7 @@ const pad=n=>String(n).padStart(2,"0"),key=d=>d.getFullYear()+"-"+pad(d.getMonth
 let S={days:{},med:"",meds:[],name:"",age:0};try{Object.assign(S,JSON.parse(localStorage.getItem("hf-v2")||"{}"))}catch(e){}
 const save=()=>{try{localStorage.setItem("hf-v2",JSON.stringify(S))}catch(e){}};
 const D=k=>S.days[k]||(S.days[k]={w:0,e:0,wl:0,wd:0,sl:0,kg:0,mo:0,m:{}});
+try{localStorage.setItem('routine_last_app','health');}catch(e){}
 let cur=key(new Date());const WG=8,WM=15,EG=30;
 const TG=["💡 Did you know?","🪔 Desi wisdom","🔥 Fuel up","🏃 Try today"];
 const FQ=[
