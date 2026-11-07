@@ -9,23 +9,42 @@
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-  <!-- Futuristic Typography -->
+  <!-- Instant PWA Launch Routing Script: Executes before rendering to avoid screen flashing -->
+  <script>
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isHomeRequest = urlParams.get('home') === '1' || window.location.hash === '#home';
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      const lastApp = localStorage.getItem('routine_last_app');
+
+      // In standalone installed mode (or returning user), resume directly into the last active app immediately
+      if (!isHomeRequest && (isStandalone || localStorage.getItem('routine_auto_resume') === 'true') && lastApp) {
+        if (lastApp === 'budget') {
+          window.location.replace('budget/');
+        } else if (lastApp === 'health') {
+          window.location.replace('health/');
+        }
+      }
+    })();
+  </script>
+
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --bg: #030712;
-      --card: rgba(15, 23, 42, 0.65);
-      --card-border: rgba(56, 189, 248, 0.18);
-      --card-hover: rgba(56, 189, 248, 0.45);
+      --card-bg: rgba(15, 23, 42, 0.72);
+      --card-border: rgba(56, 189, 248, 0.22);
       --text-main: #f8fafc;
       --text-mute: #94a3b8;
       --cyan: #38bdf8;
-      --cyan-glow: #0284c7;
       --emerald: #10b981;
       --indigo: #6366f1;
+      --glow-cyan: rgba(56, 189, 248, 0.35);
+      --glow-emerald: rgba(16, 185, 129, 0.35);
     }
 
     * {
@@ -47,10 +66,10 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      padding: 24px 20px;
+      padding: 24px 16px;
     }
 
-    /* Ambient animated futuristic aura orbs */
+    /* Ambient animated futuristic background orbs */
     .ambient-glow {
       position: fixed;
       inset: 0;
@@ -62,134 +81,70 @@
     .orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(100px);
-      opacity: 0.38;
+      filter: blur(110px);
+      opacity: 0.45;
       animation: floatOrb 14s ease-in-out infinite alternate;
     }
 
     .orb-1 {
-      width: 440px;
-      height: 440px;
+      width: 480px;
+      height: 480px;
       background: radial-gradient(circle, #0284c7 0%, #38bdf8 60%, transparent 80%);
       top: -120px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 15%;
     }
 
     .orb-2 {
-      width: 380px;
-      height: 380px;
-      background: radial-gradient(circle, #6366f1 0%, #a855f7 70%, transparent 80%);
-      bottom: -100px;
-      left: -80px;
-      animation-duration: 18s;
-      animation-delay: -5s;
-    }
-
-    .orb-3 {
-      width: 350px;
-      height: 350px;
+      width: 420px;
+      height: 420px;
       background: radial-gradient(circle, #059669 0%, #10b981 70%, transparent 80%);
-      bottom: -60px;
-      right: -80px;
-      animation-duration: 16s;
-      animation-delay: -8s;
+      bottom: -100px;
+      right: 15%;
+      animation-duration: 18s;
+      animation-delay: -6s;
     }
 
     @keyframes floatOrb {
-      0% { transform: translate(-50%, 0) scale(1); }
-      50% { transform: translate(-45%, 40px) scale(1.12); }
-      100% { transform: translate(-55%, -30px) scale(0.92); }
+      0% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(40px) scale(1.08); }
+      100% { transform: translateY(-30px) scale(0.94); }
     }
 
-    /* Cyber dot matrix grid background */
+    /* Cyber matrix grid */
     .grid-matrix {
       position: fixed;
       inset: 0;
       background-image: 
         radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.08) 1px, transparent 0);
       background-size: 32px 32px;
-      mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 85%);
-      -webkit-mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 85%);
+      mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 90%);
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 90%);
       pointer-events: none;
       z-index: 1;
     }
 
-    /* Central Glass Stage */
-    main {
+    /* Main Container */
+    .app-shell {
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 410px;
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border-radius: 36px;
-      padding: 40px 28px 32px;
-      box-shadow: 
-        0 24px 60px -15px rgba(0, 0, 0, 0.8),
-        0 0 45px -10px rgba(56, 189, 248, 0.15),
-        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      max-width: 860px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      text-align: center;
-      animation: stageEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      transform-style: preserve-3d;
-      perspective: 1000px;
+      gap: 28px;
     }
 
-    @keyframes stageEntrance {
-      from { opacity: 0; transform: translateY(24px) scale(0.96); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    /* Hero App Icon with Pulsing Halo */
-    .icon-stage {
-      position: relative;
-      margin-bottom: 22px;
+    /* Header Title Area */
+    .header-bar {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      animation: fadeInDown 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    .icon-halo {
-      position: absolute;
-      inset: -14px;
-      border-radius: 46px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.45) 0%, rgba(99, 102, 241, 0.15) 60%, transparent 80%);
-      filter: blur(18px);
-      animation: haloPulse 3.5s ease-in-out infinite alternate;
-      z-index: 0;
-    }
-
-    @keyframes haloPulse {
-      0% { opacity: 0.55; transform: scale(0.96); }
-      100% { opacity: 0.95; transform: scale(1.08); }
-    }
-
-    .app-icon {
-      position: relative;
-      z-index: 1;
-      width: 136px;
-      height: 136px;
-      border-radius: 36px;
-      box-shadow: 
-        0 18px 40px -10px rgba(0, 0, 0, 0.7),
-        0 0 25px rgba(56, 189, 248, 0.35);
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-      cursor: pointer;
-    }
-
-    .app-icon:hover {
-      transform: translateY(-4px) scale(1.05) rotate(1deg);
-      box-shadow: 
-        0 24px 50px -10px rgba(0, 0, 0, 0.85),
-        0 0 35px rgba(56, 189, 248, 0.6);
-    }
-
-    /* Cyber Futuristic Date Pill */
     .date-pill {
       display: inline-flex;
       align-items: center;
@@ -197,13 +152,12 @@
       font-size: 11.5px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       color: var(--cyan);
       background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.22);
+      border: 1px solid rgba(56, 189, 248, 0.25);
       padding: 5px 16px;
       border-radius: 999px;
-      margin-bottom: 12px;
       box-shadow: 0 0 16px rgba(56, 189, 248, 0.12);
     }
 
@@ -221,139 +175,299 @@
       50% { opacity: 0.3; }
     }
 
-    /* Big Futuristic Title */
-    h1.app-title {
+    h1.brand-title {
       font-family: 'Syne', sans-serif;
-      font-size: 42px;
+      font-size: clamp(38px, 6vw, 54px);
       font-weight: 900;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.04em;
       line-height: 1;
       background: linear-gradient(135deg, #ffffff 15%, #bae6fd 55%, #38bdf8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 35px rgba(56, 189, 248, 0.35);
-      margin-bottom: 8px;
+      text-shadow: 0 0 40px rgba(56, 189, 248, 0.35);
     }
 
-    p.tagline {
+    .header-subtitle {
       color: var(--text-mute);
-      font-size: 13.5px;
-      line-height: 1.5;
+      font-size: 14px;
       font-weight: 500;
-      max-width: 320px;
-      margin-bottom: 26px;
+      max-width: 440px;
     }
 
-    /* Install Button with Neon Flow */
-    .btn-install {
-      position: relative;
+    /* Tinder-style Dual Cards Deck: Both visible simultaneously */
+    .cards-deck {
       width: 100%;
-      padding: 16px 28px;
-      border: none;
-      border-radius: 20px;
-      font-family: 'Syne', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-      color: #030712;
-      background: linear-gradient(135deg, #ffffff 0%, #7dd3fc 45%, #0284c7 100%);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 22px;
+      perspective: 1200px;
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .tinder-card {
+      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 32px;
+      padding: 30px 26px;
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
       cursor: pointer;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      box-shadow: 
-        0 12px 28px -6px rgba(2, 132, 199, 0.55),
-        0 0 24px rgba(56, 189, 248, 0.4);
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 22px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s, box-shadow 0.28s;
+      transform-style: preserve-3d;
       overflow: hidden;
     }
 
-    .btn-install::before {
+    /* Card glow & bevel styles */
+    .tinder-card::before {
       content: '';
       position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        60deg,
-        transparent 35%,
-        rgba(255, 255, 255, 0.6) 50%,
-        transparent 65%
-      );
-      transform: rotate(25deg) translateY(-100%);
-      animation: buttonShine 4.5s infinite ease-in-out;
+      inset: 0;
+      border-radius: 32px;
+      padding: 1.5px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), transparent 60%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
     }
 
-    @keyframes buttonShine {
-      0%, 60% { transform: rotate(25deg) translateY(-100%); }
-      100% { transform: rotate(25deg) translateY(100%); }
+    /* Budget Card Theming */
+    .tinder-card.budget-card {
+      border-color: rgba(56, 189, 248, 0.25);
+      box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.75), 0 0 25px -8px var(--glow-cyan);
+    }
+    .tinder-card.budget-card:hover {
+      transform: translateY(-8px) scale(1.02) rotateZ(-0.75deg);
+      border-color: var(--cyan);
+      box-shadow: 0 28px 55px -10px rgba(0, 0, 0, 0.85), 0 0 45px -5px var(--glow-cyan);
     }
 
-    .btn-install:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 
-        0 18px 36px -4px rgba(2, 132, 199, 0.75),
-        0 0 35px rgba(56, 189, 248, 0.65);
+    /* Health Card Theming */
+    .tinder-card.health-card {
+      border-color: rgba(16, 185, 129, 0.25);
+      box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.75), 0 0 25px -8px var(--glow-emerald);
+    }
+    .tinder-card.health-card:hover {
+      transform: translateY(-8px) scale(1.02) rotateZ(0.75deg);
+      border-color: var(--emerald);
+      box-shadow: 0 28px 55px -10px rgba(0, 0, 0, 0.85), 0 0 45px -5px var(--glow-emerald);
     }
 
-    .btn-install:active {
-      transform: scale(0.97);
+    .tinder-card:active {
+      transform: scale(0.97) !important;
     }
 
-    /* Sub Launcher Buttons */
-    .launchers {
+    /* Card Top: Icon & Title */
+    .card-top {
       display: flex;
-      gap: 12px;
-      width: 100%;
-      margin-top: 14px;
+      align-items: center;
+      gap: 18px;
     }
 
-    .btn-card {
-      flex: 1;
-      padding: 13px 14px;
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid var(--card-border);
+    .card-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.6);
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+
+    .tinder-card:hover .card-icon {
+      transform: scale(1.08) rotate(3deg);
+    }
+
+    .card-meta {
+      text-align: left;
+    }
+
+    .card-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 99px;
+      display: inline-block;
+      margin-bottom: 5px;
+    }
+
+    .badge-budget {
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--cyan);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    .badge-health {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.15;
+    }
+
+    .card-desc {
+      font-size: 12.5px;
+      color: var(--text-mute);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    /* Card Body Highlights Grid */
+    .card-highlights {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      background: rgba(3, 7, 18, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: 18px;
-      color: var(--text-main);
-      text-decoration: none;
-      font-size: 13px;
+      padding: 12px 14px;
+    }
+
+    .highlight-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: left;
+    }
+
+    .hl-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-mute);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .hl-val {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+
+    /* Card Action Footer */
+    .card-footer-btn {
+      width: 100%;
+      padding: 13px 20px;
+      border-radius: 16px;
+      font-size: 14px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       transition: all 0.2s ease;
-      backdrop-filter: blur(14px);
     }
 
-    .btn-card:hover {
-      border-color: var(--cyan);
-      background: rgba(56, 189, 248, 0.12);
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
-      transform: translateY(-2px);
+    .budget-card .card-footer-btn {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--cyan);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    .budget-card:hover .card-footer-btn {
+      background: var(--cyan);
+      color: #030712;
+      box-shadow: 0 0 20px var(--glow-cyan);
     }
 
-    .btn-card:active {
-      transform: scale(0.96);
+    .health-card .card-footer-btn {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .health-card:hover .card-footer-btn {
+      background: var(--emerald);
+      color: #030712;
+      box-shadow: 0 0 20px var(--glow-emerald);
     }
 
-    .btn-card img, .btn-card svg {
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
+    /* PWA Install Notification Bar (Only shown in browser when app is NOT installed) */
+    #pwaInstallBar {
+      display: none;
+      width: 100%;
+      max-width: 440px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 12px 18px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      animation: fadeInDown 0.6s ease forwards;
+    }
+
+    .pwa-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .pwa-info-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
       flex-shrink: 0;
     }
 
+    .pwa-text-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .pwa-text-desc {
+      font-size: 11px;
+      color: var(--text-mute);
+    }
+
+    .btn-quick-install {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      color: #030712;
+      border: none;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+    .btn-quick-install:active {
+      transform: scale(0.95);
+    }
+
+    /* Footer info */
     footer {
-      position: relative;
-      z-index: 10;
       font-size: 11.5px;
       color: var(--text-mute);
-      margin-top: 22px;
-      letter-spacing: 0.02em;
-      opacity: 0.75;
+      opacity: 0.7;
+      letter-spacing: 0.04em;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -362,57 +476,127 @@
   <div class="ambient-glow">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
   </div>
 
   <!-- Cyberpunk Dot Matrix -->
   <div class="grid-matrix"></div>
 
-  <!-- Central Glassmorphic Command Hub -->
-  <main id="mainCard">
-    <div class="icon-stage">
-      <div class="icon-halo"></div>
-      <img src="icons/icon-192.png" 
-           onerror="this.onerror=null;this.src='icons/icon-512.png';"
-           alt="Routine App Icon" 
-           class="app-icon" 
-           id="heroIcon">
+  <div class="app-shell">
+    <!-- Browser-Only Quick Install Banner (Auto-hidden inside installed PWA) -->
+    <div id="pwaInstallBar">
+      <div class="pwa-info">
+        <img src="icons/icon-192.png" alt="Routine" class="pwa-info-icon">
+        <div>
+          <div class="pwa-text-title">Install Routine App</div>
+          <div class="pwa-text-desc">Fast offline home screen access</div>
+        </div>
+      </div>
+      <button id="pwaInstallBtn" class="btn-quick-install">Install</button>
     </div>
 
-    <div class="date-pill">
-      <span class="date-pill-dot"></span>
-      <span id="liveDate">Routine</span>
-    </div>
+    <!-- Header Area -->
+    <header class="header-bar">
+      <div class="date-pill">
+        <span class="date-pill-dot"></span>
+        <span id="liveDate">Routine</span>
+      </div>
+      <h1 class="brand-title">ROUTINE</h1>
+      <p class="header-subtitle">Tap either app to launch in milliseconds. Your last choice resumes automatically on reload.</p>
+    </header>
 
-    <h1 class="app-title">ROUTINE</h1>
-    <p class="tagline">Next-generation budget planner and biometric daily wellness log. Zero cloud tracking.</p>
+    <!-- Tinder-style Dual Cards Deck: Both visible simultaneously -->
+    <div class="cards-deck">
+      
+      <!-- CARD 1: BUDGET CALCULATOR -->
+      <a href="budget/" class="tinder-card budget-card" onclick="selectApp('budget')">
+        <div class="card-top">
+          <img src="icons/icon-budget-192.png" 
+               alt="Budget App" 
+               class="card-icon"
+               onerror="this.onerror=null;this.src='icons/icon-budget-512.png';">
+          <div class="card-meta">
+            <span class="card-badge badge-budget">Finance</span>
+            <h2 class="card-title">Budget</h2>
+            <p class="card-desc">Monthly planner, daily expense logs & annual trend analytics</p>
+          </div>
+        </div>
 
-    <!-- Interactive Neon Install CTA -->
-    <button id="installBtn" class="btn-install">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      <span>Install Routine</span>
-    </button>
+        <div class="card-highlights">
+          <div class="highlight-item">
+            <span class="hl-label">Salary & Cap</span>
+            <span class="hl-val">Take-Home Log</span>
+          </div>
+          <div class="highlight-item">
+            <span class="hl-label">Analytics</span>
+            <span class="hl-val">50/30/20 Trends</span>
+          </div>
+          <div class="highlight-item">
+            <span class="hl-label">Daily Spend</span>
+            <span class="hl-val">Calendar Log</span>
+          </div>
+          <div class="highlight-item">
+            <span class="hl-label">Export</span>
+            <span class="hl-val">PDF & Excel</span>
+          </div>
+        </div>
 
-    <!-- Direct Sub-App Fast Launchers -->
-    <div class="launchers">
-      <a href="budget/" class="btn-card">
-        <img src="icons/icon-budget-192.png" alt="₹" onerror="this.onerror=null;this.style.display='none';">
-        <span>Open Budget</span>
+        <div class="card-footer-btn">
+          <span>Open Budget</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </div>
       </a>
-      <a href="health/" class="btn-card">
-        <img src="icons/icon-health-192.png" alt="♥" onerror="this.onerror=null;this.style.display='none';">
-        <span>Open Health</span>
-      </a>
-    </div>
-  </main>
 
-  <footer>
-    Hardware Encrypted &bull; Offline Architecture &bull; Local Storage
-  </footer>
+      <!-- CARD 2: HEALTH TRACKER -->
+      <a href="health/" class="tinder-card health-card" onclick="selectApp('health')">
+        <div class="card-top">
+          <img src="icons/icon-health-192.png" 
+               alt="Health Tracker" 
+               class="card-icon"
+               onerror="this.onerror=null;this.src='icons/icon-health-512.png';">
+          <div class="card-meta">
+            <span class="card-badge badge-health">Wellness</span>
+            <h2 class="card-title">Health Tracker</h2>
+            <p class="card-desc">Daily water intake, meal walks, sleep, medication & mood</p>
+          </div>
+        </div>
+
+        <div class="card-highlights">
+          <div class="highlight-item">
+            <span class="hl-label">Hydration</span>
+            <span class="hl-val">8-Glass Goal</span>
+          </div>
+          <div class="highlight-item">
+            <span class="hl-label">Activity</span>
+            <span class="hl-val">Post-Meal Walks</span>
+          </div>
+          <div class="highlight-item">
+            <span class="hl-label">Recovery</span>
+            <span class="hl-val">Sleep & Mood</span>
+          </div>
+          <div class="highlight-item">
+            <span class="hl-label">Care</span>
+            <span class="hl-val">Dose Tracking</span>
+          </div>
+        </div>
+
+        <div class="card-footer-btn">
+          <span>Open Health</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </div>
+      </a>
+
+    </div>
+
+    <footer>
+      Hardware-Encrypted Client-Side Storage &bull; Instant Offline Execution
+    </footer>
+  </div>
 
   <script>
     // Live Dynamic Date Pill
@@ -422,60 +606,44 @@
       month: "short"
     });
 
-    // 3D Tilt Micro-Interaction on Mouse Move
-    const card = document.getElementById("mainCard");
-    const icon = document.getElementById("heroIcon");
+    // Remember the user's choice immediately in localStorage
+    function selectApp(appName) {
+      localStorage.setItem('routine_last_app', appName);
+      localStorage.setItem('routine_auto_resume', 'true');
+    }
 
-    if (window.matchMedia("(hover: hover)").matches) {
-      document.addEventListener("mousemove", (e) => {
-        const xAxis = (window.innerWidth / 2 - e.pageX) / 28;
-        const yAxis = (window.innerHeight / 2 - e.pageY) / 28;
-        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-      });
+    // PWA Installation Handling: Only prompt if app is NOT in standalone mode
+    let deferredPrompt = null;
+    const installBar = document.getElementById("pwaInstallBar");
+    const installBtn = document.getElementById("pwaInstallBtn");
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-      document.addEventListener("mouseleave", () => {
-        card.style.transform = "rotateY(0deg) rotateX(0deg)";
+    if (!isStandalone) {
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (installBar) installBar.style.display = "flex";
       });
     }
 
-    // PWA Prompt Installation Logic
-    let deferredPrompt = null;
-    const installBtn = document.getElementById("installBtn");
-
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBtn.innerHTML = `
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        <span>Install App</span>
-      `;
-    });
-
-    installBtn.addEventListener("click", async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === "accepted") {
-          installBtn.innerHTML = `<span>App Installed ✓</span>`;
-          installBtn.style.opacity = "0.75";
+    if (installBtn) {
+      installBtn.addEventListener("click", async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === "accepted") {
+            if (installBar) installBar.style.display = "none";
+          }
+          deferredPrompt = null;
         }
-        deferredPrompt = null;
-      } else {
-        // Fallback: direct route into Budget if already installed or unsupported
-        window.location.href = "budget/";
-      }
-    });
+      });
+    }
 
     window.addEventListener("appinstalled", () => {
-      installBtn.innerHTML = `<span>App Installed ✓</span>`;
-      installBtn.style.opacity = "0.75";
+      if (installBar) installBar.style.display = "none";
     });
 
-    // Register Service Worker
+    // Service Worker Registration
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("sw.js").catch(() => {});

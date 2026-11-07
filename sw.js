@@ -1,5 +1,5 @@
-// Routine unified cyber service worker
-const CACHE = 'routine-v-200';
+// Routine unified service worker v300
+const CACHE = 'routine-v-300';
 const FILES = [
   "./",
   "./index.html",
