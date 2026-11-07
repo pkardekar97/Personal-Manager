@@ -1,14 +1,14 @@
 {
-  "id": "routine-app",
-  "name": "Routine",
-  "short_name": "Routine",
-  "description": "Next-generation budget management and biometric daily wellness log. Works offline.",
+  "id": "kardekar-manager",
+  "name": "Kardekar Manager",
+  "short_name": "Kardekar",
+  "description": "Budget and health tracking in one app. Works offline.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#030712",
-  "theme_color": "#030712",
+  "background_color": "#0b0f17",
+  "theme_color": "#0b0f17",
   "icons": [
     {
       "src": "icons/icon-192.png",
