@@ -157,6 +157,14 @@
           <i class="fa-solid fa-cloud text-slate-400"></i>
           <span class="hidden sm:inline">Synced</span>
         </span>
+        <a href="../?home=1" title="Back to Routine Home" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-[#2c3345] bg-slate-50 dark:bg-[#181c25] hover:bg-slate-200 dark:hover:bg-[#222736] text-slate-700 dark:text-slate-200 text-xs font-bold shadow-sm active:scale-95 transition text-sky-600 dark:text-sky-400">
+          <i class="fa-solid fa-house text-sky-500"></i>
+          <span>Home</span>
+        </a>
+        <a href="../health/" title="Switch to Health Tracker" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-300/60 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-[#13221e] hover:bg-emerald-100 dark:hover:bg-[#19322b] text-emerald-700 dark:text-emerald-400 text-xs font-bold shadow-sm active:scale-95 transition">
+          <i class="fa-solid fa-heart-pulse text-emerald-500"></i>
+          <span>Health</span>
+        </a>
         <button id="themeToggleBtn" title="Switch Light/Dark Mode" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-[#2c3345] bg-slate-50 dark:bg-[#181c25] hover:bg-slate-200 dark:hover:bg-[#222736] text-slate-700 dark:text-slate-200 text-xs font-semibold shadow-sm active:scale-95 transition">
           <i id="themeIcon" class="fa-solid fa-moon text-amber-400"></i>
           <span id="themeLabel">Dark</span>
@@ -532,6 +540,23 @@
     </div>
 
     <!-- Persistent Footer -->
+    <!-- Quick Switcher to Health Tracker -->
+    <div class="w-full bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-sky-500/10 border border-emerald-500/20 dark:border-emerald-500/30 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 dark:text-emerald-400 text-lg">
+          <i class="fa-solid fa-heart-pulse"></i>
+        </div>
+        <div>
+          <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Daily Health & Wellness Tracker</h4>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Log water intake, post-meal walks, sleep hours & mood</p>
+        </div>
+      </div>
+      <a href="../health/" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 active:scale-95 transition flex items-center gap-1.5">
+        <span>Open Health Tracker</span>
+        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+      </a>
+    </div>
+
     <footer class="pt-4 border-t border-slate-200 dark:border-[#1d222b] text-center text-xs text-slate-500 dark:text-slate-500 flex flex-wrap justify-between items-center gap-2">
       <span>Personal Budget Calculator & Long-Term Financial Analytics</span>
       <span>Auto-saved locally &bull; Client-side security</span>
@@ -1798,12 +1823,12 @@
       let csv = "\uFEFF";
       csv += `Monthly Budget Report - ${d.periodLabel}\n`;
       csv += `Budget Planner,"${d.userName}"\n`;
-      csv += `Monthly Net Salary,₹${d.salary}\n`;
-      csv += `Total Planned Cap,₹${d.totalCap}\n`;
-      csv += `Total Spent,₹${d.totalSpent}\n`;
-      csv += `Net Available Surplus,₹${d.surplus}\n`;
+      csv += `Monthly Net Salary,Rs. ${d.salary}\n`;
+      csv += `Total Planned Cap,Rs. ${d.totalCap}\n`;
+      csv += `Total Spent,Rs. ${d.totalSpent}\n`;
+      csv += `Net Available Surplus,Rs. ${d.surplus}\n`;
       csv += `Savings Potential,${d.savingsRate}%\n`;
-      csv += `Real Surplus in Bank,${appState.realSurplus == null ? 'Not entered' : '₹' + appState.realSurplus}\n\n`;
+      csv += `Real Surplus in Bank,${appState.realSurplus == null ? 'Not entered' : 'Rs. ' + appState.realSurplus}\n\n`;
 
       csv += `Section,Category,Budget Limit (Rs.),Actual Spent (Rs.),Remaining (Rs.),Status (% Used)\n`;
       d.needsRows.forEach(r => {
@@ -2109,6 +2134,8 @@
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
+      try { localStorage.setItem('routine_last_app', 'budget'); } catch(e){}
+
       initTheme();
       initTabs();
       await initIndexedDB();
