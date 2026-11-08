@@ -9,24 +9,16 @@
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="apple-touch-icon" href="../icons/icon-192.png">
 
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
-  </script>
-
-  <!-- Font Awesome 6 Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <!-- Chart.js CDN for Long-Term Visualizations -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Google Fonts: Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendor/tailwind.css">
+  <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+  <script src="vendor/chart.umd.js"></script>
+  <style>
+    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-400-normal.woff2') format('woff2');}
+    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:500;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-500-normal.woff2') format('woff2');}
+    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:600;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-600-normal.woff2') format('woff2');}
+    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:700;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-700-normal.woff2') format('woff2');}
+    @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:800;font-display:swap;src:url('vendor/fonts/plus-jakarta-sans-latin-800-normal.woff2') format('woff2');}
+  </style>
 
   <style>
     * {
@@ -135,6 +127,12 @@
 
     <!-- Top Navigation Bar: Navigation Tabs & Theme Toggle -->
     <div class="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-[#232730]">
+      <!-- Left group: Home + tabs -->
+      <div class="flex flex-wrap items-center gap-2">
+        <a href="../?home=1" title="Back to Routine Home" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-sm font-extrabold shadow-lg shadow-sky-500/30 active:scale-95 transition">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </a>
       <!-- Tab Controls -->
       <div class="flex flex-wrap items-center gap-1 p-1 bg-slate-200 dark:bg-[#161920] rounded-xl border border-slate-300 dark:border-[#242936]">
         <button id="tabPlannerBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-white dark:bg-[#202533] text-sky-600 dark:text-sky-300">
@@ -151,20 +149,14 @@
         </button>
       </div>
 
+      </div>
+
       <!-- Right Controls: Theme Toggle & Cloud Status -->
       <div class="flex items-center space-x-2">
         <span id="sync_status" class="text-slate-400 flex items-center gap-1.5 text-[11px] font-medium mr-1">
           <i class="fa-solid fa-cloud text-slate-400"></i>
           <span class="hidden sm:inline">Synced</span>
         </span>
-        <a href="../?home=1" title="Back to Routine Home" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-[#2c3345] bg-slate-50 dark:bg-[#181c25] hover:bg-slate-200 dark:hover:bg-[#222736] text-slate-700 dark:text-slate-200 text-xs font-bold shadow-sm active:scale-95 transition text-sky-600 dark:text-sky-400">
-          <i class="fa-solid fa-house text-sky-500"></i>
-          <span>Home</span>
-        </a>
-        <a href="../health/" title="Switch to Health Tracker" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-300/60 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-[#13221e] hover:bg-emerald-100 dark:hover:bg-[#19322b] text-emerald-700 dark:text-emerald-400 text-xs font-bold shadow-sm active:scale-95 transition">
-          <i class="fa-solid fa-heart-pulse text-emerald-500"></i>
-          <span>Health</span>
-        </a>
         <button id="themeToggleBtn" title="Switch Light/Dark Mode" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-[#2c3345] bg-slate-50 dark:bg-[#181c25] hover:bg-slate-200 dark:hover:bg-[#222736] text-slate-700 dark:text-slate-200 text-xs font-semibold shadow-sm active:scale-95 transition">
           <i id="themeIcon" class="fa-solid fa-moon text-amber-400"></i>
           <span id="themeLabel">Dark</span>
@@ -209,7 +201,7 @@
             <i class="fa-regular fa-user text-sm"></i>
           </div>
           <div class="flex-1">
-            <label for="userNameInput" class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">Budget Planner</label>
+            <label for="userNameInput" class="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">Name</label>
             <input 
               id="userNameInput" 
               type="text" 

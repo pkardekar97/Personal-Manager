@@ -1,5 +1,5 @@
-// Routine unified service worker v300
-const CACHE = 'routine-v-300';
+// Routine unified service worker v301 (fully offline: libraries and fonts are bundled)
+const CACHE = 'routine-v-301';
 const FILES = [
   "./",
   "./index.html",
@@ -14,7 +14,27 @@ const FILES = [
   "./budget/",
   "./budget/index.html",
   "./health/",
-  "./health/index.html"
+  "./health/index.html",
+  "./budget/vendor/chart.umd.js",
+  "./budget/vendor/fontawesome/css/all.min.css",
+  "./budget/vendor/fontawesome/webfonts/fa-brands-400.woff2",
+  "./budget/vendor/fontawesome/webfonts/fa-regular-400.woff2",
+  "./budget/vendor/fontawesome/webfonts/fa-solid-900.woff2",
+  "./budget/vendor/fontawesome/webfonts/fa-v4compatibility.woff2",
+  "./budget/vendor/fonts/plus-jakarta-sans-latin-400-normal.woff2",
+  "./budget/vendor/fonts/plus-jakarta-sans-latin-500-normal.woff2",
+  "./budget/vendor/fonts/plus-jakarta-sans-latin-600-normal.woff2",
+  "./budget/vendor/fonts/plus-jakarta-sans-latin-700-normal.woff2",
+  "./budget/vendor/fonts/plus-jakarta-sans-latin-800-normal.woff2",
+  "./budget/vendor/tailwind.css",
+  "./fonts/inter-latin-300-normal.woff2",
+  "./fonts/inter-latin-400-normal.woff2",
+  "./fonts/inter-latin-500-normal.woff2",
+  "./fonts/inter-latin-600-normal.woff2",
+  "./fonts/montserrat-latin-400-normal.woff2",
+  "./fonts/montserrat-latin-500-normal.woff2",
+  "./fonts/montserrat-latin-600-normal.woff2",
+  "./fonts/montserrat-latin-700-normal.woff2"
 ];
 
 const fresh = r => r.mode === 'navigate' || r.url.endsWith('.webmanifest');
