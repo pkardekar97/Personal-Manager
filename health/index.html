@@ -26,7 +26,14 @@ button.sw{position:relative;width:66px;height:36px;min-height:36px;padding:0 3px
 .gl{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px;justify-items:center}
 .gl b{width:100%;max-width:56px;height:64px;border:2px solid #8fd3ff;border-radius:6px 6px 16px 16px;background:var(--acc2);position:relative;overflow:hidden;cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
 .gl b::after{content:"";position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(#8fd3ff,#5db8ff);transition:height .4s}.gl b.f::after{height:92%}.gl b:active{transform:scale(.92)}
-input[type=range]{width:100%;min-height:36px;accent-color:var(--acc);margin-top:6px}
+/* Same approach as the Budget sliders: only the round handle reacts, so scrolling over the bar never changes the value */
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:36px;margin:6px 0 0;padding:0;background:transparent;outline:none;pointer-events:none;touch-action:pan-y pinch-zoom}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(90deg,var(--acc) calc(14px + (100% - 28px)*var(--p,0)),var(--line) 0)}
+input[type=range]::-moz-range-track{height:8px;border-radius:99px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:8px;border-radius:99px;background:var(--acc)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;margin-top:-10px;border-radius:50%;background:#fff;border:3px solid var(--acc);box-shadow:0 1px 5px rgba(0,0,0,.45),0 0 0 3px rgba(56,189,248,.22);pointer-events:auto;touch-action:pan-y pinch-zoom;cursor:grab}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--acc);box-shadow:0 1px 5px rgba(0,0,0,.45);pointer-events:auto;touch-action:pan-y pinch-zoom;cursor:grab}
+input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--acc);outline-offset:3px}
 .chk,.opt{display:flex;gap:10px;align-items:center;min-height:44px;border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:8px;cursor:pointer;font-weight:600}.opt{flex:1 1 120px;margin:0}
 .chk input,.opt input{width:22px;height:22px;accent-color:var(--md);margin:0}.chk:has(input:checked),.opt:has(input:checked){border-color:var(--md);background:var(--acc2)}
 .g{height:100px;display:flex;align-items:flex-end;gap:2px;position:relative;margin-top:8px;border-bottom:1px solid var(--line)}.g div{flex:1;border-radius:3px 3px 0 0;min-height:2px}
@@ -150,7 +157,7 @@ function gr(t,fn,goal,u,col){const[y,mo]=am.split("-").map(Number),n=new Date(y,
 function render(){const d=D(cur),[y,mo]=cur.split("-").map(Number);
  $("day").value=cur;$("kg").value=d.kg||"";$("dt").textContent=(S.name?S.name+(S.age?", "+S.age+" yrs":"")+" · ":"")+new Date(cur+"T00:00").toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"});
  $("wv").textContent=d.w+" / "+WM+" glasses · "+d.w*250+" ml";$("wg").innerHTML=Array.from({length:WM},(_,i)=>`<b data-i="${i}" role="button" aria-label="Glass ${i+1}" class="${i<d.w?"f":""}"></b>`).join("");
- $("ev").textContent=d.e+" min";$("er").value=d.e;$("eg").textContent=d.e>=EG?"Goal reached ✓":"Goal: "+EG+" minutes";$("c1").checked=!!d.wl;$("c2").checked=!!d.wd;
+ $("ev").textContent=d.e+" min";$("er").value=d.e;$("er").style.setProperty("--p",d.e/120);$("eg").textContent=d.e>=EG?"Goal reached ✓":"Goal: "+EG+" minutes";$("c1").checked=!!d.wl;$("c2").checked=!!d.wd;
  $("sh").value=d.sl||"";$("sv").textContent=d.sl?d.sl+" h":"–";const ok=d.sl>=6&&d.sl<=8;$("sv").style.color=ok?"var(--md)":"";
  $("ss").textContent=!d.sl?"Enter the hours you slept last night.":ok?"Healthy sleep ✓":d.sl<6?"A little short. Aim for 6–8 hours.":"Long sleep. 6–8 hours is ideal.";
  document.querySelectorAll("[name=om]").forEach(r=>r.checked=S.med===r.value);$("mq").hidden=S.med!=="y";renderDz(d);$("nm").value=S.name||"";$("age").value=S.age||"";$("mdr").innerHTML=["😞","😕","😐","🙂","😄"].map((e,i)=>`<button data-mo="${i+1}" class="${d.mo===i+1?"on":""}" aria-label="Mood ${i+1}">${e}</button>`).join("");
